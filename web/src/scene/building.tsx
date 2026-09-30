@@ -487,14 +487,20 @@ function Interior({ site, b, x, y, ctx, pal }: { site: Site; b: Building; x: num
       </ShadowLayer>
       <Prism b={backX} c={shade(wallC, -0.05)} right={shade(wallC, -0.12)} top={pal.wallCut} />
       <Prism b={backY} c={wallC} top={pal.wallCut} />
-      {Array.from({ length: Math.max(1, Math.floor(b.w / 5)) }, (_, i) => {
-        const u = ((i + 0.5) * b.w) / Math.max(1, Math.floor(b.w / 5)) - 0.9;
-        return <Win key={`wy${i}`} b={{ ...backY, d: t }} face="left" u={u} v={1.4} w={1.8} h={1.9} pal={pal} />;
-      })}
-      {Array.from({ length: Math.max(1, Math.floor(b.d / 5)) }, (_, i) => {
-        const u = ((i + 0.5) * (b.d + t)) / Math.max(1, Math.floor(b.d / 5)) - 0.9;
-        return <Win key={`wx${i}`} b={backX} face="right" u={u} v={1.4} w={1.8} h={1.9} pal={pal} />;
-      })}
+      {b.kind === 'datacenter' ? (
+        <DataCenterWalls b={b} x={x} y={y} backX={backX} backY={backY} pal={pal} />
+      ) : (
+        <>
+          {Array.from({ length: Math.max(1, Math.floor(b.w / 5)) }, (_, i) => {
+            const u = ((i + 0.5) * b.w) / Math.max(1, Math.floor(b.w / 5)) - 0.9;
+            return <Win key={`wy${i}`} b={{ ...backY, d: t }} face="left" u={u} v={1.4} w={1.8} h={1.9} pal={pal} />;
+          })}
+          {Array.from({ length: Math.max(1, Math.floor(b.d / 5)) }, (_, i) => {
+            const u = ((i + 0.5) * (b.d + t)) / Math.max(1, Math.floor(b.d / 5)) - 0.9;
+            return <Win key={`wx${i}`} b={backX} face="right" u={u} v={1.4} w={1.8} h={1.9} pal={pal} />;
+          })}
+        </>
+      )}
       {sorted.map((it) => {
         if (it.kind === 'wall') return <Prism key={it.key} b={it.box} c={wallC} top={pal.wallCut} />;
         const u = it.unit;
@@ -504,6 +510,48 @@ function Interior({ site, b, x, y, ctx, pal }: { site: Site; b: Building; x: num
       })}
       <Prism b={{ x: x - t, y: y + b.d, z: 0, w: b.w + t, d: t, h: 0.55 }} c={wallC} top={pal.wallCut} />
       <Prism b={{ x: x + b.w, y: y - t, z: 0, w: t, d: b.d + t * 2, h: 0.55 }} c={wallC} top={pal.wallCut} />
+    </g>
+  );
+}
+
+/** Windowless data center hall: overhead cable trays (like the reference art), fire panel, exit sign. */
+function DataCenterWalls({ b, x, y, backX, backY, pal }: { b: Building; x: number; y: number; backX: Box; backY: Box; pal: Palette }) {
+  const z = WALL_H - 0.95;
+  const trayX: Box = { x, y, z, w: 0.5, d: b.d, h: 0.12 };
+  const trayY: Box = { x: x + 0.5, y, z, w: b.w - 0.5, d: 0.5, h: 0.12 };
+  const cables = [pal.cableYellow, pal.cableCyan, pal.cableRed];
+  const fy = faceMap(backY, 'left');
+  const fx = faceMap(backX, 'right');
+  return (
+    <g>
+      {/* hangers */}
+      {Array.from({ length: Math.floor(b.w / 4) }, (_, i) => {
+        const hx = x + 2 + i * 4;
+        const a = p(hx, y + 0.25, z + 0.12);
+        const c = p(hx, y + 0.25, WALL_H);
+        return <line key={`hy${i}`} x1={a[0]} y1={a[1]} x2={c[0]} y2={c[1]} style={{ stroke: pal.devVent, strokeWidth: 1 }} />;
+      })}
+      {Array.from({ length: Math.floor(b.d / 4) }, (_, i) => {
+        const hy = y + 2 + i * 4;
+        const a = p(x + 0.25, hy, z + 0.12);
+        const c = p(x + 0.25, hy, WALL_H);
+        return <line key={`hx${i}`} x1={a[0]} y1={a[1]} x2={c[0]} y2={c[1]} style={{ stroke: pal.devVent, strokeWidth: 1 }} />;
+      })}
+      <Prism b={trayX} c={pal.devSide} top={pal.devVent} />
+      {cables.map((c, i) => (
+        <polygon key={`cx${i}`} points={pts([p(x + 0.1 + i * 0.12, y, z + 0.13), p(x + 0.18 + i * 0.12, y, z + 0.13), p(x + 0.18 + i * 0.12, y + b.d, z + 0.13), p(x + 0.1 + i * 0.12, y + b.d, z + 0.13)])} style={fill(c)} />
+      ))}
+      <Prism b={trayY} c={pal.devSide} top={pal.devVent} />
+      {cables.map((c, i) => (
+        <polygon key={`cy${i}`} points={pts([p(x + 0.5, y + 0.1 + i * 0.12, z + 0.13), p(x + b.w, y + 0.1 + i * 0.12, z + 0.13), p(x + b.w, y + 0.18 + i * 0.12, z + 0.13), p(x + 0.5, y + 0.18 + i * 0.12, z + 0.13)])} style={fill(c)} />
+      ))}
+      {/* fire alarm panel and exit sign on the back wall, electrical panel on the side wall */}
+      <polygon points={quad(fy, b.w * 0.12, 1.5, b.w * 0.12 + 0.6, 2.2)} style={fill(pal.cableRed)} />
+      <polygon points={quad(fy, b.w * 0.12 + 0.2, 1.75, b.w * 0.12 + 0.4, 1.95)} style={fill(shade(pal.cableRed, -0.35))} />
+      <polygon points={quad(fy, b.w * 0.62, 2.7, b.w * 0.62 + 1.0, 3.05)} style={fill('#2FB36B')} />
+      <polygon points={quad(fy, b.w * 0.62 + 0.15, 2.84, b.w * 0.62 + 0.85, 2.91)} style={fill('#ffffff')} />
+      <polygon points={quad(fx, b.d * 0.3, 0.9, b.d * 0.3 + 1.1, 2.4)} style={fill(shade(pal.devSilver, -0.1))} />
+      <polygon points={quad(fx, b.d * 0.3 + 0.1, 2.1, b.d * 0.3 + 1.0, 2.25)} style={fill(pal.devVent)} />
     </g>
   );
 }
