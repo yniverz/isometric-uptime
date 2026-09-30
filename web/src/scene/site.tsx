@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import type { Building, Site } from '../../../shared/model';
 import { depthSort, p, pts, seeded } from '../iso/iso';
 import { groundColors, shade, type Palette } from '../iso/palette';
@@ -144,7 +144,7 @@ function Island({ site, pal }: { site: Site; pal: Palette }) {
   return <g className="island">{els}</g>;
 }
 
-export function SiteView({ site, ctx }: { site: Site; ctx: SiteCtx }) {
+export const SiteView = memo(function SiteView({ site, ctx }: { site: Site; ctx: SiteCtx }) {
   const pal = usePal();
   const { decos, paths } = useMemo(() => decorations(site), [site]);
   const focused = ctx.focusPath[0] === site.id;
@@ -211,4 +211,4 @@ export function SiteView({ site, ctx }: { site: Site; ctx: SiteCtx }) {
       )}
     </g>
   );
-}
+});

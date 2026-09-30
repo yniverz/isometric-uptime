@@ -17,9 +17,36 @@
   cursor: grabbing;
 }
 .world polygon {
-  stroke-width: 0.6px;
+  /* --sw is 0.6 screen px expressed in world units, updated when zooming stops.
+     (vector-effect: non-scaling-stroke on thousands of polygons is slow to zoom.) */
+  stroke-width: var(--sw, 0.6px);
   stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
+}
+/* Pause decorative animations while the camera moves: every running SVG
+   animation forces a repaint, which competes with smooth zooming. */
+.world.moving .led-core,
+.world.moving .led-halo,
+.world.moving .pin-ring,
+.world.moving .blink,
+.world.moving .blink-slow,
+.world.moving .strip-core,
+.world.moving .strip-glow,
+.world.moving .smoke circle,
+.world.moving .wifi-arc,
+.world.moving .plate,
+.world.moving .holo-beam,
+.world.moving .chip-ring,
+.world.moving .member-pulse,
+.world.moving .link,
+.world.moving .sel-outline,
+.world.moving .dev-alarm,
+.world.moving .alarm-glow,
+.world.moving .scr-alert {
+  animation-play-state: paused !important;
+}
+.world.moving .ent,
+.world.moving .ent * {
+  pointer-events: none;
 }
 .world text {
   font-family: var(--font);
@@ -37,15 +64,12 @@
 
 /* ---- hover lift ------------------------------------------------------- */
 .lift {
-  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.28s;
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .site.active > .site-body:hover > .lift,
 .building.active > .ext:hover > .lift,
 .unit.active:hover > .lift {
   transform: translateY(var(--lift));
-}
-.unit.active:hover > .lift {
-  filter: brightness(1.06);
 }
 .ent.active {
   cursor: pointer;
@@ -117,19 +141,16 @@ polygon.hit {
   pointer-events: none;
 }
 .bshadow {
-  opacity: 0.12;
-  filter: url(#soft);
+  opacity: 0.08;
 }
 .island-shadow {
-  opacity: 0.18;
-  filter: url(#softer);
+  opacity: 0.1;
 }
 .dark .island-shadow {
-  opacity: 0.55;
+  opacity: 0.4;
 }
 .floor-line {
-  stroke-width: 1px;
-  vector-effect: non-scaling-stroke;
+  stroke-width: calc(1px * var(--ls, 1));
 }
 .floor-text {
   opacity: 0.55;
@@ -181,8 +202,7 @@ polygon.hit {
 .pin-dot {
   fill: var(--st);
   stroke: var(--pin-stroke);
-  stroke-width: 1.5px;
-  vector-effect: non-scaling-stroke;
+  stroke-width: calc(1.5px * var(--ls, 1));
 }
 .pin-shine {
   fill: #fff;
@@ -190,15 +210,13 @@ polygon.hit {
 }
 .pin-stem {
   stroke: var(--st);
-  stroke-width: 1.2px;
-  vector-effect: non-scaling-stroke;
+  stroke-width: calc(1.2px * var(--ls, 1));
   opacity: 0.55;
 }
 .pin-ring {
   fill: none;
   stroke: var(--st);
-  stroke-width: 2px;
-  vector-effect: non-scaling-stroke;
+  stroke-width: calc(2px * var(--ls, 1));
   transform-box: fill-box;
   transform-origin: center;
   animation: ring 1.6s ease-out infinite;
@@ -313,8 +331,7 @@ polygon.hit {
 .wifi-arc {
   fill: none;
   stroke: var(--led);
-  stroke-width: 1.4px;
-  vector-effect: non-scaling-stroke;
+  stroke-width: calc(1.4px * var(--ls, 1));
   opacity: 0;
 }
 .wifi.st-up .wifi-arc {
@@ -336,7 +353,6 @@ polygon.hit {
 .alarm-glow {
   fill: var(--down);
   stroke: none !important;
-  filter: url(#soft);
   animation: alarm 1.4s ease-in-out infinite;
 }
 .sel-outline {
@@ -358,7 +374,6 @@ polygon.hit {
 }
 .lamp-glow {
   opacity: var(--lamp-opacity);
-  filter: url(#soft);
 }
 
 /* ---- hologram --------------------------------------------------------- */
@@ -421,7 +436,7 @@ polygon.hit {
 .mini .c-l,
 .mini .c-r {
   fill: var(--led);
-  filter: brightness(0.7);
+  opacity: 0.7;
 }
 .chip.st-unknown .chip-led .c-t,
 .mini.st-unknown .c-t {
@@ -469,7 +484,6 @@ polygon.hit {
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
-  filter: drop-shadow(0 0 3px currentColor);
   stroke-dasharray: 10 7;
   vector-effect: non-scaling-stroke;
   animation: dash 0.9s linear infinite;

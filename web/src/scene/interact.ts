@@ -3,6 +3,7 @@ import { unitFootprint, type World } from '../../../shared/model';
 import { unproject } from '../iso/iso';
 import { indexWorld } from '../state';
 import { checkpoint, commitLive, navigate, select, useStore } from '../state/store';
+import { useHover } from '../state/ephemeral';
 import { camera } from './camera';
 
 /** Shared between the background pan handler and entity handlers. */
@@ -112,16 +113,16 @@ export function entityHandlers(o: EntityOpts) {
       if (o.drag && st.edit && (e.pointerType === 'mouse' || st.selected === o.id)) startDrag(e, o.id, o.drag);
     },
     onPointerEnter: (e: RPointerEvent) => {
-      if (e.pointerType === 'mouse') useStore.setState({ hover: { id: o.id, x: e.clientX, y: e.clientY } });
+      if (e.pointerType === 'mouse') useHover.setState({ hover: { id: o.id, x: e.clientX, y: e.clientY } });
     },
     onPointerMove: (e: RPointerEvent) => {
       if (e.pointerType !== 'mouse') return;
       e.stopPropagation();
-      const h = useStore.getState().hover;
-      if (!h || h.id !== o.id || Math.abs(h.x - e.clientX) + Math.abs(h.y - e.clientY) > 2) useStore.setState({ hover: { id: o.id, x: e.clientX, y: e.clientY } });
+      const h = useHover.getState().hover;
+      if (!h || h.id !== o.id || Math.abs(h.x - e.clientX) + Math.abs(h.y - e.clientY) > 2) useHover.setState({ hover: { id: o.id, x: e.clientX, y: e.clientY } });
     },
     onPointerLeave: () => {
-      if (useStore.getState().hover?.id === o.id) useStore.setState({ hover: null });
+      if (useHover.getState().hover?.id === o.id) useHover.setState({ hover: null });
     },
   };
 }

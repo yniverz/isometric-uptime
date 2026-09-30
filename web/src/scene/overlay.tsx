@@ -4,6 +4,7 @@ import { shade } from '../iso/palette';
 import { clustersOf, indexWorld, resolvePath } from '../state';
 import { guestHealth } from '../state/health';
 import { selectSub, useStore } from '../state/store';
+import { useHover } from '../state/ephemeral';
 import { HOLO_CELL, deviceFrontPoint, holoPlates, machineAnchor, type HoloPlate } from './layout';
 import { Billboard, useLabelScale, useMonStatus, usePal } from './primitives';
 import { pointer } from './interact';
@@ -92,12 +93,12 @@ function clickSub(id: string) {
 
 function hoverProps(id: string) {
   return {
-    onPointerEnter: (e: React.PointerEvent) => useStore.setState({ hover: { id, x: e.clientX, y: e.clientY } }),
+    onPointerEnter: (e: React.PointerEvent) => useHover.setState({ hover: { id, x: e.clientX, y: e.clientY } }),
     onPointerMove: (e: React.PointerEvent) => {
       e.stopPropagation();
-      useStore.setState({ hover: { id, x: e.clientX, y: e.clientY } });
+      useHover.setState({ hover: { id, x: e.clientX, y: e.clientY } });
     },
-    onPointerLeave: () => useStore.setState({ hover: null }),
+    onPointerLeave: () => useHover.setState({ hover: null }),
   };
 }
 

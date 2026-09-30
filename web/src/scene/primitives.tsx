@@ -175,5 +175,5 @@ export function HitBox({ b }: { b: Box }) {
 export function GroundShadow({ b, spread = 0.25, opacity = 0.18 }: { b: Box; spread?: number; opacity?: number }) {
   const pal = usePal();
   const pts4 = [p(b.x - spread, b.y - spread, b.z), p(b.x + b.w + spread, b.y - spread, b.z), p(b.x + b.w + spread, b.y + b.d + spread, b.z), p(b.x - spread, b.y + b.d + spread, b.z)];
-  return <polygon points={pts(pts4)} style={{ fill: pal.shadow, opacity, filter: 'url(#soft)' }} />;
+  return <polygon className="gshadow" points={pts(pts4)} style={{ fill: pal.shadow, opacity: opacity * 0.75 }} />;
 }

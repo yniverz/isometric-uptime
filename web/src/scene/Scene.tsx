@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { depthSort, screenBounds } from '../iso/iso';
 import { DARK, LIGHT } from '../iso/palette';
 import { indexWorld } from '../state';
 import { isDark, levelOf, navigateUp, useStore } from '../state/store';
+import { useView } from '../state/ephemeral';
 import { camera } from './camera';
 import { pointer, pointerDown, pointerMoved } from './interact';
 import { focusBoxes } from './layout';
@@ -17,17 +18,30 @@ export function Scene({ insets }: { insets: { top: number; right: number; bottom
   const focus = useStore((s) => s.focus);
   const edit = useStore((s) => s.edit);
   const selected = useStore((s) => s.selected);
-  const labelScale = useStore((s) => s.labelScale);
   const dark = useStore(isDark);
   const pal = dark ? DARK : LIGHT;
   const level = levelOf(world, focus.path);
 
   useEffect(() => {
     if (svgRef.current && gRef.current) camera.attach(svgRef.current, gRef.current);
-    return camera.onSettle((s) => {
+    // Zoom-dependent CSS variables are written straight to the DOM (no React render).
+    const applyVars = (ls: number) => {
+      const el = svgRef.current;
+      if (!el) return;
+      el.style.setProperty('--lift', `${-7 * ls}px`);
+      el.style.setProperty('--sw', `${0.6 * ls}px`);
+      el.style.setProperty('--ls', String(ls));
+    };
+    applyVars(useView.getState().labelScale);
+    const unsubView = useView.subscribe((v) => applyVars(v.labelScale));
+    const unsubCam = camera.onSettle((s) => {
       const ls = Math.min(20, Math.max(0.12, 1 / s));
-      if (Math.abs(ls - useStore.getState().labelScale) / ls > 0.15) useStore.setState({ labelScale: ls });
+      if (Math.abs(ls - useView.getState().labelScale) / ls > 0.15) useView.setState({ labelScale: ls });
     });
+    return () => {
+      unsubView();
+      unsubCam();
+    };
   }, []);
 
   // Cluster members (for camera + open buildings)
@@ -68,7 +82,7 @@ export function Scene({ insets }: { insets: { top: number; right: number; bottom
     const maxScale = lvl === 'world' ? 1.6 : lvl === 'site' ? 2.2 : lvl === 'building' ? 3.2 : 11;
     const s = camera.flyTo(rect, { instant: first.current, pad: lvl === 'world' ? 60 : 40, maxScale });
     first.current = false;
-    useStore.setState({ labelScale: Math.min(20, Math.max(0.12, 1 / s)) });
+    useView.setState({ labelScale: Math.min(20, Math.max(0.12, 1 / s)) });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusKey, insetKey]);
 
@@ -146,15 +160,17 @@ export function Scene({ insets }: { insets: { top: number; right: number; bottom
 
   const sites = useMemo(() => (world ? depthSort(world.sites, (s) => ({ x: s.pos.x, y: s.pos.y, w: s.w, d: s.d })) : []), [world]);
 
-  const ctx = { focusPath: focus.cluster ? [] : focus.path, openBuildings, edit, selected, clusterMode: !!focus.cluster };
+  const ctx = useMemo(
+    () => ({ focusPath: focus.cluster ? [] : focus.path, openBuildings, edit, selected, clusterMode: !!focus.cluster }),
+    [focus.cluster, focus.path, openBuildings, edit, selected],
+  );
 
   return (
     <PalCtx.Provider value={pal}>
-      <LabelScaleCtx.Provider value={labelScale}>
+      <LabelScaleProvider>
         <svg
           ref={svgRef}
           className={`world lvl-${focus.cluster ? 'cluster' : level} ${edit ? 'editing' : ''} ${dark ? 'dark' : 'light'}`}
-          style={{ ['--lift' as string]: `${-7 * labelScale}px`, ['--ls' as string]: labelScale }}
           onPointerDown={onPointerDown}
           onClick={(e) => {
             if (pointer.moved) return;
@@ -165,12 +181,6 @@ export function Scene({ insets }: { insets: { top: number; right: number; bottom
           }}
         >
           <defs>
-            <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" />
-            </filter>
-            <filter id="softer" x="-30%" y="-30%" width="160%" height="160%">
-              <feGaussianBlur stdDeviation="14" />
-            </filter>
             <radialGradient id="bgGrad" cx="50%" cy="35%" r="75%">
               <stop offset="0%" stopColor={dark ? '#1A2438' : '#EEF3F8'} />
               <stop offset="100%" stopColor={dark ? '#0B111D' : '#D3DDE8'} />
@@ -189,7 +199,13 @@ export function Scene({ insets }: { insets: { top: number; right: number; bottom
             {world && focus.cluster && <ClusterLinks world={world} clusterId={focus.cluster} />}
           </g>
         </svg>
-      </LabelScaleCtx.Provider>
+      </LabelScaleProvider>
     </PalCtx.Provider>
   );
+}
+
+/** Only label consumers re-render when the zoom level settles. */
+function LabelScaleProvider({ children }: { children: ReactNode }) {
+  const ls = useView((v) => v.labelScale);
+  return <LabelScaleCtx.Provider value={ls}>{children}</LabelScaleCtx.Provider>;
 }

@@ -6,6 +6,7 @@ import { indexWorld, resolvePath } from '../state';
 import { buildingHealth, guestHealth, machineHealth, monStatus, siteHealth, unitHealth, worldHealth } from '../state/health';
 import { dismissToast, goToEntity, levelOf, logout, navigate, navigateUp, redo, setEdit, undo, useStore } from '../state/store';
 import { camera } from '../scene/camera';
+import { useHover } from '../state/ephemeral';
 import { Inspector } from './editor/Inspector';
 import { kindIcon, ViewPanel } from './panels';
 import { CountChips, Dot, StatusPill } from './widgets';
@@ -220,7 +221,7 @@ export function SidePanel({ open, setOpen, mobile, sheet, setSheet }: { open: bo
 // ---------------------------------------------------------------------------
 
 export function Tooltip() {
-  const hover = useStore((s) => s.hover);
+  const hover = useHover((s) => s.hover);
   const world = useStore((s) => s.world);
   const monitors = useStore((s) => s.monitors);
   const ref = useRef<HTMLDivElement>(null);

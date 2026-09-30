@@ -4,6 +4,7 @@ import { normalizeWorld } from '../../../shared/model';
 import type { MonitorDTO, SessionDTO, SourceState } from '../../../shared/status';
 import { api, ApiError } from './api';
 import { indexWorld, invalidateIndex, resolvePath } from './index';
+import { useHover } from './ephemeral';
 
 export type Level = 'world' | 'site' | 'building' | 'rack' | 'machine';
 export type ThemePref = 'auto' | 'light' | 'dark';
@@ -36,7 +37,6 @@ interface State {
   streamOk: boolean;
 
   focus: Focus;
-  labelScale: number;
 
   edit: boolean;
   selected: string | null;
@@ -53,7 +53,6 @@ interface State {
   loginOpen: boolean;
   clustersOpen: boolean;
   settingsOpen: boolean;
-  hover: { id: string; x: number; y: number } | null;
 }
 
 const ls = {
@@ -83,7 +82,6 @@ export const useStore = create<State>(() => ({
   source: null,
   streamOk: false,
   focus: { path: [] },
-  labelScale: 1,
   edit: false,
   selected: null,
   saveState: 'idle',
@@ -97,7 +95,6 @@ export const useStore = create<State>(() => ({
   loginOpen: false,
   clustersOpen: false,
   settingsOpen: false,
-  hover: null,
 }));
 
 const set = useStore.setState;
@@ -146,7 +143,8 @@ export function readHash(): Focus {
 
 export function navigate(path: string[], extra: Partial<Focus> = {}) {
   const focus: Focus = { path, sub: extra.sub ?? null, cluster: extra.cluster ?? null };
-  set({ focus, selected: get().edit ? get().selected : null, hover: null });
+  set({ focus, selected: get().edit ? get().selected : null });
+  useHover.setState({ hover: null });
   writeHash(focus);
 }
 
@@ -169,7 +167,8 @@ export function selectSub(sub: string | null) {
 
 export function focusCluster(id: string | null) {
   const f: Focus = { path: id ? [] : get().focus.path, cluster: id, sub: null };
-  set({ focus: f, hover: null });
+  set({ focus: f });
+  useHover.setState({ hover: null });
   writeHash(f);
 }
 

@@ -184,7 +184,12 @@ function RackDeviceView({
   const slide = useTween(focused ? 1.4 : hovered && active ? 0.35 : 0);
   const zb = RACK_BASE + (d.u - 1) * U_HEIGHT + 0.003;
   const hh = d.size * U_HEIGHT - 0.006;
-  const box = fr.box(0.07, RACK_DEPTH - 0.01, zb, RACK_WIDTH - 0.14, 0.04 + slide, hh);
+  // Flush devices are a thin plate whose back edge is hidden by the device above.
+  // A slid-out device only draws the part in front of the neighbours' front plane,
+  // so its top face never covers the device above it.
+  const FRONT = RACK_DEPTH + 0.03;
+  const out = slide > 0.002;
+  const box = out ? fr.box(0.07, FRONT, zb, RACK_WIDTH - 0.14, slide, hh) : fr.box(0.07, RACK_DEPTH - 0.01, zb, RACK_WIDTH - 0.14, 0.04, hh);
   const c = rackDeviceColor(d.type, pal);
   const h = entityHandlers({ id: d.id, path, active });
   return (

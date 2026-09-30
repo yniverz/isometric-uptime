@@ -48,9 +48,24 @@ class Camera {
     this.g?.setAttribute('transform', `translate(${this.x.toFixed(2)},${this.y.toFixed(2)}) scale(${this.s.toFixed(5)})`);
   }
 
+  private moving = false;
+
+  /** While the camera moves, decorative animations are paused (see .world.moving). */
+  private startMoving() {
+    if (this.settleTimer) clearTimeout(this.settleTimer);
+    if (!this.moving) {
+      this.moving = true;
+      this.svg?.classList.add('moving');
+    }
+  }
+
   private settled() {
     if (this.settleTimer) clearTimeout(this.settleTimer);
-    this.settleTimer = setTimeout(() => this.listeners.forEach((l) => l(this.s)), 120);
+    this.settleTimer = setTimeout(() => {
+      this.moving = false;
+      this.svg?.classList.remove('moving');
+      this.listeners.forEach((l) => l(this.s));
+    }, 150);
   }
 
   viewport(): Rect {
@@ -89,6 +104,7 @@ class Camera {
     const to = { s: target.s, cx: (vp.x + vp.w / 2 - target.x) / target.s, cy: (vp.y + vp.h / 2 - target.y) / target.s };
     const dist = Math.hypot(to.cx - from.cx, to.cy - from.cy) * Math.min(from.s, to.s);
     const duration = opts.duration ?? Math.min(1300, 650 + dist * 0.25 + Math.abs(Math.log(to.s / from.s)) * 120);
+    this.startMoving();
     const t0 = performance.now();
     const ls0 = Math.log(from.s);
     const ls1 = Math.log(to.s);
@@ -117,13 +133,16 @@ class Camera {
 
   panBy(dx: number, dy: number) {
     this.stop();
+    this.startMoving();
     this.x += dx;
     this.y += dy;
     this.apply();
+    this.settled();
   }
 
   zoomAt(clientX: number, clientY: number, factor: number) {
     this.stop();
+    this.startMoving();
     const r = this.svg?.getBoundingClientRect();
     const px = clientX - (r?.left ?? 0);
     const py = clientY - (r?.top ?? 0);
