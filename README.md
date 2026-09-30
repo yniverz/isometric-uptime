@@ -45,7 +45,7 @@ Instead of a list of monitors you get one continuous world: click a site and the
 
 4. Deploy, open `http://<host>:3000`, click **Edit** and start building your world.
 
-Portainer builds the image from the repository. To update, use **Pull and redeploy** on the stack.
+Portainer builds the image from the repository (`pull_policy: build`, nothing is downloaded from a registry). To update, use **Pull and redeploy** on the stack; the latest code is fetched from GitHub and the image is rebuilt.
 
 > If Kuma runs in another stack on the same host, either use the host IP, or attach both containers to a shared Docker network and use `http://uptime-kuma:3001`.
 

@@ -11,6 +11,9 @@ services:
   isometric-uptime:
     build: .
     image: isometric-uptime:latest
+    # Always build from this repository; the image is not published to a
+    # registry, so "pull" would fail (e.g. Portainer's "Re-pull image").
+    pull_policy: build
     container_name: isometric-uptime
     restart: unless-stopped
     ports:
