@@ -32,7 +32,7 @@ function Modal({ title, onClose, children, wide }: { title: ReactNode; onClose: 
 
 export function LoginDialog() {
   const open = useStore((s) => s.loginOpen);
-  const [u, setU] = useState('admin');
+  const [u, setU] = useState('');
   const [p, setP] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -66,11 +66,11 @@ function LoginForm({ u, p, setU, setP, err, busy, onSubmit }: { u: string; p: st
     >
       <label className="field">
         <span className="field-label">Username</span>
-        <input className="input" autoComplete="username" value={u} onChange={(e) => setU(e.target.value)} />
+        <input className="input" autoComplete="username" autoFocus value={u} onChange={(e) => setU(e.target.value)} />
       </label>
       <label className="field">
         <span className="field-label">Password</span>
-        <input className="input" type="password" autoComplete="current-password" autoFocus value={p} onChange={(e) => setP(e.target.value)} />
+        <input className="input" type="password" autoComplete="current-password" value={p} onChange={(e) => setP(e.target.value)} />
       </label>
       {err && <div className="form-error">{err}</div>}
       <button className="btn primary block" disabled={busy}>
@@ -82,7 +82,7 @@ function LoginForm({ u, p, setU, setP, err, busy, onSubmit }: { u: string; p: st
 
 /** Full-screen login when the viewer may not even read. */
 export function LoginScreen() {
-  const [u, setU] = useState('admin');
+  const [u, setU] = useState('');
   const [p, setP] = useState('');
   const [err, setErr] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
