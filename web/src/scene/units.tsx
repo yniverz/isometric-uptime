@@ -73,10 +73,10 @@ export function RackView({ rack, ox, oy, ctx }: { rack: RackUnit; ox: number; oy
 
   return (
     <g className={`ent unit rack ${handlers.onClick ? 'active' : ''} ${dim ? 'dim' : ''} ${isFocus ? 'focus' : ''}`} {...handlers}>
+      {ctx.edit && ctx.selected === rack.id && <Outline b={body} className="sel-outline" />}
+      <GroundShadow b={body} spread={0.18} opacity={0.22} />
       {handlers.onClick && <HitBox b={body} />}
       <g className="lift">
-        {ctx.edit && ctx.selected === rack.id && <Outline b={body} className="sel-outline" />}
-        <GroundShadow b={body} spread={0.18} opacity={0.22} />
         <Prism b={body} c={pal.rackFrame} top={pal.rackTop} left={colors.left} right={colors.right} />
         <polygon points={quad(fb, cavity.u0, cavity.v0, cavity.u1, cavity.v1)} style={{ fill: pal.rackInner, stroke: pal.rackInner }} />
         {/* feet */}
@@ -247,11 +247,11 @@ export function MachineView({ m, ox, oy, ctx }: { m: MachineUnit; ox: number; oy
   const monitored = DEVICE_TYPES[m.type]?.monitored || m.monitorId != null;
   return (
     <g className={`ent unit machine ${handlers.onClick ? 'active' : ''} ${dim ? 'dim' : ''} ${isFocus ? 'focus' : ''}`} {...handlers}>
+      {ctx.edit && ctx.selected === m.id && <Outline b={foot} className="sel-outline" />}
+      {(self === 'down' || rollup === 'down') && <Outline b={foot} className="alarm-glow" />}
+      <GroundShadow b={foot} spread={0.05} opacity={0.14} />
       {handlers.onClick && <HitBox b={{ ...foot, h: height }} />}
       <g className="lift">
-        {ctx.edit && ctx.selected === m.id && <Outline b={foot} className="sel-outline" />}
-        {(self === 'down' || rollup === 'down') && <Outline b={foot} className="alarm-glow" />}
-        <GroundShadow b={foot} spread={0.05} opacity={0.14} />
         <MachineArt m={m} fr={fr} self={self} />
       </g>
       {monitored && <Pin x={foot.x + foot.w / 2} y={foot.y + foot.d / 2} z={height + 0.45} r={0.3} status={rollup} className="pin-unit" />}

@@ -96,6 +96,13 @@ function DecoView({ d, pal, snow }: { d: Deco; pal: Palette; snow: boolean }) {
   );
 }
 
+function IslandShadow({ site, pal }: { site: Site; pal: Palette }) {
+  const { x, y } = site.pos;
+  const { w, d } = site;
+  const z = -ISLAND_T - 7;
+  return <polygon className="island-shadow" points={pts([p(x + 2, y + 2, z), p(x + w + 2, y + 2, z), p(x + w + 2, y + d + 2, z), p(x + 2, y + d + 2, z)])} style={{ fill: pal.shadow }} />;
+}
+
 function Island({ site, pal }: { site: Site; pal: Palette }) {
   const { x, y } = site.pos;
   const { w, d } = site;
@@ -105,8 +112,6 @@ function Island({ site, pal }: { site: Site; pal: Palette }) {
   const sideTop = urban ? shade(g.top, -0.18) : shade(g.top, -0.12);
   const soil = urban ? pal.slabSide : site.theme === 'snow' ? pal.rock : pal.soil;
   const els: ReactNode[] = [];
-  // shadow far below
-  els.push(<polygon key="shadow" className="island-shadow" points={pts([p(x + 2, y + 2, -ISLAND_T - 7), p(x + w + 2, y + 2, -ISLAND_T - 7), p(x + w + 2, y + d + 2, -ISLAND_T - 7), p(x + 2, y + d + 2, -ISLAND_T - 7)])} style={{ fill: pal.shadow }} />);
   // sides
   els.push(<polygon key="sl" points={pts([p(x, y + d, -ISLAND_T), p(x + w, y + d, -ISLAND_T), p(x + w, y + d, -lip), p(x, y + d, -lip)])} style={fill(soil)} />);
   els.push(<polygon key="sr" points={pts([p(x + w, y + d, -ISLAND_T), p(x + w, y, -ISLAND_T), p(x + w, y, -lip), p(x + w, y + d, -lip)])} style={fill(shade(soil, -0.22))} />);
@@ -165,6 +170,7 @@ export const SiteView = memo(function SiteView({ site, ctx }: { site: Site; ctx:
   return (
     <g className={`ent site ${handlers.onClick ? 'active' : ''} ${focused ? 'focus' : ''} ${inOther ? 'dim' : ''}`} data-id={site.id}>
       <g {...handlers} className="site-body">
+        <IslandShadow site={site} pal={pal} />
         {handlers.onClick && <HitBox b={{ x: site.pos.x, y: site.pos.y, z: -ISLAND_T, w: site.w, d: site.d, h: ISLAND_T }} />}
         <g className="lift">
           <Island site={site} pal={pal} />

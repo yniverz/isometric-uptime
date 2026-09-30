@@ -55,14 +55,16 @@ export function BuildingView({ site, b, ctx }: { site: Site; b: Building; ctx: B
 
   return (
     <g className={`ent building ${handlers.onClick ? 'active' : ''} ${ctx.open ? 'open' : ''} ${ctx.fade ? 'fade' : ''} ${ctx.dim ? 'dim' : ''}`} data-id={b.id}>
+      {/* Ground-level things stay put when the building lifts on hover, and are
+          drawn before the interior so they never cover what is inside. */}
+      <polygon className="bshadow" points={pts([p(x, y, 0), p(x + b.w + 1.2, y, 0), p(x + b.w + 1.2, y + b.d + 1.2, 0), p(x, y + b.d + 1.2, 0)])} style={{ fill: pal.shadow }} />
+      {ctx.edit && ctx.selected === b.id && (
+        <polygon className="sel-outline" points={pts([p(x - 0.4, y - 0.4, 0.02), p(x + b.w + 0.4, y - 0.4, 0.02), p(x + b.w + 0.4, y + b.d + 0.4, 0.02), p(x - 0.4, y + b.d + 0.4, 0.02)])} />
+      )}
       {showInterior && <Interior site={site} b={b} x={x} y={y} ctx={ctx} pal={pal} />}
       <g className="ext" {...handlers}>
         {handlers.onClick && <HitBox b={{ x, y, z: 0, w: b.w, d: b.d, h: ext.top }} />}
         <g className="lift">
-          {ctx.edit && ctx.selected === b.id && (
-            <polygon className="sel-outline" points={pts([p(x - 0.4, y - 0.4, 0.02), p(x + b.w + 0.4, y - 0.4, 0.02), p(x + b.w + 0.4, y + b.d + 0.4, 0.02), p(x - 0.4, y + b.d + 0.4, 0.02)])} />
-          )}
-          <polygon className="bshadow" points={pts([p(x, y, 0), p(x + b.w + 1.2, y, 0), p(x + b.w + 1.2, y + b.d + 1.2, 0), p(x, y + b.d + 1.2, 0)])} style={{ fill: pal.shadow }} />
           <g className="ext-body">{ext.body}</g>
           <g className="ext-roof">
             {ext.roof}
