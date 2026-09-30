@@ -1,6 +1,7 @@
 import type { Building, BuildingKind, Cluster, DeviceType, Guest, MachineUnit, RackDevice, RackUnit, Room, Service, Site, Unit, World } from '../../../../shared/model';
 import { DEVICE_TYPES, newId, unitFootprint } from '../../../../shared/model';
 import { indexWorld } from '../../state';
+import { commit } from '../../state/store';
 
 type Rect = { x: number; y: number; w: number; d: number };
 
@@ -177,4 +178,17 @@ export function removeEntity(w: World, id: string): void {
 /** Look up a mutable entity inside a draft world. */
 export function find(w: World, id: string) {
   return indexWorld(w).get(id);
+}
+
+/** Turn a rack or standalone device to face the other way (keeps it inside the building). */
+export function rotateUnit(id: string) {
+  commit((w) => {
+    const e = find(w, id);
+    const unit = e?.kind === 'rack' ? e.rack : e?.kind === 'machine' && !e.rack ? (e.unit as MachineUnit) : null;
+    if (!e || !unit || (e.kind !== 'rack' && e.kind !== 'machine')) return;
+    unit.facing = unit.facing === 'left' ? 'right' : 'left';
+    const [fw, fd] = unitFootprint(unit);
+    unit.pos.x = Math.max(0, Math.min(e.building.w - fw, unit.pos.x));
+    unit.pos.y = Math.max(0, Math.min(e.building.d - fd, unit.pos.y));
+  });
 }

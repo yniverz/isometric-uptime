@@ -21,15 +21,35 @@ export function pointerMoved(e: { clientX: number; clientY: number }) {
 
 type DragKind = 'site' | 'building' | 'unit';
 
-function posOf(world: World, id: string, kind: DragKind) {
+type Rect = { x: number; y: number; w: number; d: number };
+
+function overlaps(a: Rect, b: Rect) {
+  const e = 1e-6;
+  return a.x < b.x + b.w - e && a.x + a.w > b.x + e && a.y < b.y + b.d - e && a.y + a.d > b.y + e;
+}
+
+/** What can be dragged, its container bounds and the siblings it must not overlap. */
+function dragTarget(world: World, id: string, kind: DragKind) {
   const e = indexWorld(world).get(id);
   if (!e) return null;
-  if (kind === 'site' && e.kind === 'site') return { pos: e.site.pos, max: null };
-  if (kind === 'building' && e.kind === 'building') return { pos: e.building.pos, max: { x: e.site.w - e.building.w, y: e.site.d - e.building.d } };
+  if (kind === 'site' && e.kind === 'site') {
+    const others = world.sites.filter((s) => s.id !== id).map((s) => ({ x: s.pos.x - 2, y: s.pos.y - 2, w: s.w + 4, d: s.d + 4 }));
+    return { pos: e.site.pos, size: { w: e.site.w, d: e.site.d }, max: null, others, siteIndex: world.sites.indexOf(e.site) };
+  }
+  if (kind === 'building' && e.kind === 'building') {
+    const others = e.site.buildings.filter((b) => b.id !== id).map((b) => ({ x: b.pos.x, y: b.pos.y, w: b.w, d: b.d }));
+    return { pos: e.building.pos, size: { w: e.building.w, d: e.building.d }, max: { x: e.site.w - e.building.w, y: e.site.d - e.building.d }, others, siteIndex: world.sites.indexOf(e.site) };
+  }
   if (kind === 'unit' && (e.kind === 'rack' || e.kind === 'machine')) {
     const unit = e.kind === 'rack' ? e.rack : e.unit;
     const [fw, fd] = unitFootprint(unit);
-    return { pos: unit.pos, max: { x: e.building.w - fw, y: e.building.d - fd } };
+    const others = e.building.units
+      .filter((u) => u.id !== unit.id)
+      .map((u) => {
+        const [w, d] = unitFootprint(u);
+        return { x: u.pos.x, y: u.pos.y, w, d };
+      });
+    return { pos: unit.pos, size: { w: fw, d: fd }, max: { x: e.building.w - fw, y: e.building.d - fd }, others, siteIndex: world.sites.indexOf(e.site) };
   }
   return null;
 }
@@ -38,7 +58,7 @@ function startDrag(e: RPointerEvent, id: string, kind: DragKind) {
   const world = useStore.getState().world;
   if (!world) return;
   const draft = structuredClone(world);
-  const target = posOf(draft, id, kind);
+  const target = dragTarget(draft, id, kind);
   if (!target) return;
   e.stopPropagation();
   (e.target as Element).setPointerCapture?.(e.pointerId);
@@ -61,11 +81,17 @@ function startDrag(e: RPointerEvent, id: string, kind: DragKind) {
       nx = Math.max(0, Math.min(target.max.x, nx));
       ny = Math.max(0, Math.min(target.max.y, ny));
     }
-    if (nx !== target.pos.x || ny !== target.pos.y) {
-      target.pos.x = nx;
-      target.pos.y = ny;
-      commitLive({ ...draft });
-    }
+    if (nx === target.pos.x && ny === target.pos.y) return;
+    // Don't walk into other things: keep the last free position.
+    if (target.others.some((o) => overlaps({ x: nx, y: ny, ...target.size }, o))) return;
+    target.pos.x = nx;
+    target.pos.y = ny;
+    // Sites are memoised by object identity: give the containing site a new
+    // identity so the scene redraws while dragging.
+    const sites = [...draft.sites];
+    sites[target.siteIndex] = { ...sites[target.siteIndex] };
+    draft.sites = sites;
+    commitLive({ ...draft });
   };
   const up = () => {
     window.removeEventListener('pointermove', move);

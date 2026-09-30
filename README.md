@@ -95,7 +95,7 @@ Uptime Kuma has no full REST API, so Isometric Uptime connects like Kuma's own w
 ## Using it
 
 - **Navigate**: click to go deeper, <kbd>Esc</kbd> or the breadcrumb to go back, drag to pan, scroll/pinch to zoom.
-- **Edit**: press <kbd>E</kbd> or click **Edit**. Click to select, double-click to go inside, drag to move (hold <kbd>Alt</kbd> for fine steps), <kbd>⌘Z</kbd>/<kbd>⇧⌘Z</kbd> to undo/redo, <kbd>Del</kbd> to delete.
+- **Edit**: press <kbd>E</kbd> or click **Edit**. Click to select, double-click to go inside, drag to rearrange (snaps to the floor grid, hold <kbd>Alt</kbd> for ¼ steps, items don't overlap), <kbd>R</kbd> to turn the selected rack/device around, <kbd>⌘Z</kbd>/<kbd>⇧⌘Z</kbd> to undo/redo, <kbd>Del</kbd> to delete.
 - **Link monitors**: in a device's inspector choose its *host monitor*, add *services* (or **From Kuma…** to add several at once) and *VMs & containers*. Matching monitors (by name or IP) are suggested.
 - **Clusters**: **Manage clusters** → add members, HA VMs and cluster services. A Proxmox HA VM defined on the cluster shows up above every member.
 

@@ -19,7 +19,7 @@ import {
   useStore,
 } from './state/store';
 import { commit } from './state/store';
-import { removeEntity } from './ui/editor/ops';
+import { removeEntity, rotateUnit } from './ui/editor/ops';
 import { EmptyWorld, SearchPalette, SidePanel, Toasts, Tooltip, TopBar, ZoomControls } from './ui/chrome';
 import { ClustersDialog, LoginDialog, LoginScreen, SettingsDialog } from './ui/dialogs';
 
@@ -82,6 +82,8 @@ function useShortcuts() {
       } else if (e.key === '/' ) {
         e.preventDefault();
         useStore.setState({ searchOpen: true });
+      } else if (e.key.toLowerCase() === 'r' && !mod && s.edit && s.selected) {
+        rotateUnit(s.selected);
       } else if (e.key.toLowerCase() === 'e' && !mod) {
         setEdit(!s.edit);
       } else if ((e.key === 'Delete' || e.key === 'Backspace') && s.edit && s.selected) {

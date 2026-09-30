@@ -73,18 +73,11 @@ app.addHook('onRequest', async (req, reply) => {
   reply.header('referrer-policy', 'same-origin');
   reply.header('content-security-policy', CSP);
   reply.header('cross-origin-opener-policy', 'same-origin');
-  // Defence in depth against CSRF: state-changing requests must come from our own origin.
+  // Defence in depth against CSRF (on top of SameSite cookies and JSON-only bodies):
+  // browsers mark requests coming from another site. Unlike comparing Origin with
+  // Host, this keeps working behind reverse proxies that rewrite the Host header.
   if (req.method !== 'GET' && req.method !== 'HEAD' && req.method !== 'OPTIONS') {
-    const origin = req.headers.origin;
-    if (origin) {
-      let ok = false;
-      try {
-        ok = new URL(origin).host === (req.headers['x-forwarded-host'] ?? req.headers.host);
-      } catch {
-        ok = false;
-      }
-      if (!ok) return reply.code(403).send({ error: 'Cross-origin request rejected' });
-    }
+    if (req.headers['sec-fetch-site'] === 'cross-site') return reply.code(403).send({ error: 'Cross-site request rejected' });
   }
 });
 

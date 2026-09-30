@@ -251,6 +251,7 @@ function BuildingForm({ site, b }: { site: Site; b: Building }) {
           <Select value={b.floor} options={FLOORS} onChange={(v) => u((x) => (x.floor = v))} />
         </Field>
       </Grid2>
+      <p className="muted small">Drag racks and devices in the world to rearrange them – they snap to the floor grid (hold Alt for ¼ steps) and won't overlap. Select one and press R to turn it around.</p>
       <Group title="Add inside">
         <div className="add-line">
           <Select value={rackU} options={RACK_SIZES.map((n) => ({ value: n, label: `${n}U rack` }))} onChange={setRackU} />
