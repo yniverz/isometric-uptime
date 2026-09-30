@@ -45,7 +45,9 @@ Instead of a list of monitors you get one continuous world: click a site and the
 
 4. Deploy, open `http://<host>:3000`, click **Edit** and start building your world.
 
-Portainer builds the image from the repository (`pull_policy: build`, nothing is downloaded from a registry). To update, use **Pull and redeploy** on the stack; the latest code is fetched from GitHub and the image is rebuilt.
+The stack uses the prebuilt image `ghcr.io/yniverz/isometric-uptime:latest` (amd64 and arm64), which GitHub Actions publishes on every push. To update, use **Pull and redeploy** with **Re-pull image** enabled – it only downloads the new image, so it takes seconds.
+
+To build from source on your own server instead, replace the `image:` line in `docker-compose.yml` with `build: .` and `pull_policy: build` (this takes a few minutes per deploy).
 
 > If Kuma runs in another stack on the same host, either use the host IP, or attach both containers to a shared Docker network and use `http://uptime-kuma:3001`.
 
@@ -56,7 +58,7 @@ git clone https://github.com/yniverz/isometric-uptime.git
 ```
 
 ```bash
-cd isometric-uptime && KUMA_URL=http://192.168.1.10:3001 KUMA_USERNAME=admin KUMA_PASSWORD=secret ADMIN_PASSWORD=change-me docker compose up -d --build
+cd isometric-uptime && KUMA_URL=http://192.168.1.10:3001 KUMA_USERNAME=admin KUMA_PASSWORD=secret ADMIN_PASSWORD=change-me docker compose up -d
 ```
 
 ## Configuration

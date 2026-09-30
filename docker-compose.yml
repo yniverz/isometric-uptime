@@ -4,16 +4,17 @@
 #   Repository URL:  https://github.com/yniverz/isometric-uptime
 #   Compose path:    docker-compose.yml
 #   Environment:     set the variables below (KUMA_URL, KUMA_USERNAME, ...)
+#   Update:          "Pull and redeploy" with "Re-pull image" enabled
 #
-# Plain Docker:  docker compose up -d --build
+# Plain Docker:  docker compose pull && docker compose up -d
 
 services:
   isometric-uptime:
-    build: .
-    image: isometric-uptime:latest
-    # Always build from this repository; the image is not published to a
-    # registry, so "pull" would fail (e.g. Portainer's "Re-pull image").
-    pull_policy: build
+    # Prebuilt image (amd64 + arm64), published by GitHub Actions on every push.
+    image: ghcr.io/yniverz/isometric-uptime:latest
+    # To build locally from source instead, replace the line above with:
+    #   build: .
+    #   pull_policy: build
     container_name: isometric-uptime
     restart: unless-stopped
     ports:

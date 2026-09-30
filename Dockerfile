@@ -1,10 +1,12 @@
 # syntax=docker/dockerfile:1
 
 # ---- build -----------------------------------------------------------------
-FROM node:24-alpine AS build
+# The output is plain JavaScript, so it is built once on the build machine's own
+# architecture (fast, no emulation) and then copied into each target image.
+FROM --platform=$BUILDPLATFORM node:24-alpine AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN --mount=type=cache,target=/root/.npm npm ci --no-audit --no-fund
 COPY . .
 RUN npm run build && npm prune --omit=dev --no-audit --no-fund
 
@@ -12,7 +14,9 @@ RUN npm run build && npm prune --omit=dev --no-audit --no-fund
 FROM node:24-alpine
 RUN apk add --no-cache su-exec tini
 WORKDIR /app
-ENV NODE_ENV=production \
+ARG APP_VERSION=dev
+ENV APP_VERSION=$APP_VERSION \
+    NODE_ENV=production \
     PORT=3000 \
     DATA_DIR=/data
 COPY --from=build /app/package.json ./
