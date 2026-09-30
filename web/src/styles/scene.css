@@ -140,13 +140,27 @@ polygon.hit {
   animation: fadeOut 0.5s ease both;
   pointer-events: none;
 }
-.bshadow {
-  opacity: 0.08;
+/* Shadow layers: solid shapes, translucent as a group (overlaps don't darken). */
+.shadow-layer {
+  pointer-events: none;
 }
-.island-shadow {
+.shadow-layer * {
+  stroke: none !important;
+}
+.shadow-layer.floor {
+  opacity: 0.13;
+}
+.shadow-layer.ground {
+  opacity: 0.11;
+}
+.shadow-layer.far {
   opacity: 0.1;
 }
-.dark .island-shadow {
+.dark .shadow-layer.floor,
+.dark .shadow-layer.ground {
+  opacity: 0.3;
+}
+.dark .shadow-layer.far {
   opacity: 0.4;
 }
 .floor-line {

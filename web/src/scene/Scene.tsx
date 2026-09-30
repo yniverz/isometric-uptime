@@ -9,7 +9,8 @@ import { pointer, pointerDown, pointerMoved } from './interact';
 import { focusBoxes } from './layout';
 import { ClusterLinks, Holo } from './overlay';
 import { LabelScaleCtx, PalCtx } from './primitives';
-import { SiteView } from './site';
+import { IslandShadow, SiteView } from './site';
+import { ShadowLayer } from './primitives';
 
 export function Scene({ insets }: { insets: { top: number; right: number; bottom: number; left: number } }) {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -193,6 +194,11 @@ export function Scene({ insets }: { insets: { top: number; right: number; bottom
           </defs>
           <rect className="bg" x="0" y="0" width="100%" height="100%" fill="url(#bgGrad)" />
           <g ref={gRef}>
+            <ShadowLayer kind="far">
+              {sites.map((s) => (
+                <IslandShadow key={s.id} site={s} />
+              ))}
+            </ShadowLayer>
             {sites.map((s) => (
               <SiteView key={s.id} site={s} ctx={ctx} />
             ))}

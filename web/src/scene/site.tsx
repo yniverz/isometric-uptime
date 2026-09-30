@@ -7,7 +7,7 @@ import { siteHealth } from '../state/health';
 import { BuildingView } from './building';
 import { entityHandlers } from './interact';
 import { FLOOR_H, ISLAND_T, roofHeight } from './layout';
-import { Billboard, HitBox, Prism, fill, usePal } from './primitives';
+import { Billboard, HitBox, Prism, ShadowLayer, fill, footprintPts, usePal } from './primitives';
 
 export interface SiteCtx {
   focusPath: string[];
@@ -64,7 +64,6 @@ function DecoView({ d, pal, snow }: { d: Deco; pal: Palette; snow: boolean }) {
   if (d.kind === 'bush') {
     return (
       <g>
-        <ellipse cx={bx} cy={by} rx={10 * s} ry={5 * s} style={{ fill: pal.shadow, opacity: 0.12 }} />
         <circle cx={bx - 3 * s} cy={by - 5 * s} r={6 * s} style={{ fill: pal.leafAlt }} />
         <circle cx={bx + 4 * s} cy={by - 6 * s} r={7 * s} style={{ fill: pal.leaf }} />
         <circle cx={bx + 1 * s} cy={by - 10 * s} r={5.5 * s} style={{ fill: shade(pal.leaf, 0.12) }} />
@@ -76,7 +75,6 @@ function DecoView({ d, pal, snow }: { d: Deco; pal: Palette; snow: boolean }) {
     const w = 17 * s;
     return (
       <g>
-        <ellipse cx={bx + 4} cy={by} rx={14 * s} ry={7 * s} style={{ fill: pal.shadow, opacity: 0.14 }} />
         <polygon points={pts([[bx - 2, by], [bx + 2, by + 1], [bx + 2, by - 10], [bx - 2, by - 10]])} style={fill(pal.trunk)} />
         <polygon points={pts([[bx, by - h], [bx - w, by - 9], [bx, by - 5]])} style={fill(pal.pine)} />
         <polygon points={pts([[bx, by - h], [bx + w, by - 9], [bx, by - 5]])} style={fill(shade(pal.pine, -0.22))} />
@@ -87,7 +85,6 @@ function DecoView({ d, pal, snow }: { d: Deco; pal: Palette; snow: boolean }) {
   const r = 13 * s;
   return (
     <g>
-      <ellipse cx={bx + 5} cy={by} rx={16 * s} ry={8 * s} style={{ fill: pal.shadow, opacity: 0.14 }} />
       <polygon points={pts([[bx - 2.2, by], [bx + 2.2, by + 1.2], [bx + 2.2, by - 22 * s], [bx - 2.2, by - 22 * s]])} style={fill(pal.trunk)} />
       <circle cx={bx} cy={by - 26 * s} r={r} style={{ fill: pal.leaf }} />
       <path d={`M ${bx} ${by - 26 * s - r} A ${r} ${r} 0 0 1 ${bx} ${by - 26 * s + r} A ${r * 0.55} ${r} 0 0 0 ${bx} ${by - 26 * s - r}`} style={{ fill: pal.leafAlt }} />
@@ -96,11 +93,11 @@ function DecoView({ d, pal, snow }: { d: Deco; pal: Palette; snow: boolean }) {
   );
 }
 
-function IslandShadow({ site, pal }: { site: Site; pal: Palette }) {
+export function IslandShadow({ site }: { site: Site }) {
   const { x, y } = site.pos;
   const { w, d } = site;
   const z = -ISLAND_T - 7;
-  return <polygon className="island-shadow" points={pts([p(x + 2, y + 2, z), p(x + w + 2, y + 2, z), p(x + w + 2, y + d + 2, z), p(x + 2, y + d + 2, z)])} style={{ fill: pal.shadow }} />;
+  return <polygon points={pts([p(x + 2, y + 2, z), p(x + w + 2, y + 2, z), p(x + w + 2, y + d + 2, z), p(x + 2, y + d + 2, z)])} />;
 }
 
 function Island({ site, pal }: { site: Site; pal: Palette }) {
@@ -170,7 +167,6 @@ export const SiteView = memo(function SiteView({ site, ctx }: { site: Site; ctx:
   return (
     <g className={`ent site ${handlers.onClick ? 'active' : ''} ${focused ? 'focus' : ''} ${inOther ? 'dim' : ''}`} data-id={site.id}>
       <g {...handlers} className="site-body">
-        <IslandShadow site={site} pal={pal} />
         {handlers.onClick && <HitBox b={{ x: site.pos.x, y: site.pos.y, z: -ISLAND_T, w: site.w, d: site.d, h: ISLAND_T }} />}
         <g className="lift">
           <Island site={site} pal={pal} />
@@ -178,6 +174,17 @@ export const SiteView = memo(function SiteView({ site, ctx }: { site: Site; ctx:
           {paths.map((pa, i) => (
             <polygon key={i} points={pts([p(pa.x, pa.y), p(pa.x + pa.w, pa.y), p(pa.x + pa.w, pa.y + pa.d), p(pa.x, pa.y + pa.d)])} style={fill(pal.path)} />
           ))}
+          <ShadowLayer kind="ground">
+            {site.buildings.map((b) => (
+              <polygon key={b.id} points={footprintPts(site.pos.x + b.pos.x, site.pos.y + b.pos.y, b.w + 1.2, b.d + 1.2)} />
+            ))}
+            {decos.map((d) => {
+              if (d.kind === 'lamp') return null;
+              const [bx, by] = p(d.x, d.y, 0);
+              const [ox, rx, ry] = d.kind === 'bush' ? [0, 10, 5] : d.kind === 'pine' ? [4, 14, 7] : [5, 16, 8];
+              return <ellipse key={d.key} cx={bx + ox} cy={by} rx={rx * d.s} ry={ry * d.s} />;
+            })}
+          </ShadowLayer>
           {sorted.map((o) =>
             o.kind === 'b' ? (
               <BuildingView

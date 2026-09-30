@@ -7,7 +7,7 @@ import { useStore } from '../state/store';
 import { buildingHealth } from '../state/health';
 import { entityHandlers } from './interact';
 import { FLOOR_H, WALL_H, buildingOrigin } from './layout';
-import { Billboard, HitBox, Pin, Prism, fill, usePal } from './primitives';
+import { Billboard, HitBox, Pin, Prism, ShadowLayer, fill, footprintPts, usePal } from './primitives';
 import { MachineView, RackView, type UnitCtx } from './units';
 
 export interface BuildingCtx {
@@ -56,8 +56,8 @@ export function BuildingView({ site, b, ctx }: { site: Site; b: Building; ctx: B
   return (
     <g className={`ent building ${handlers.onClick ? 'active' : ''} ${ctx.open ? 'open' : ''} ${ctx.fade ? 'fade' : ''} ${ctx.dim ? 'dim' : ''}`} data-id={b.id}>
       {/* Ground-level things stay put when the building lifts on hover, and are
-          drawn before the interior so they never cover what is inside. */}
-      <polygon className="bshadow" points={pts([p(x, y, 0), p(x + b.w + 1.2, y, 0), p(x + b.w + 1.2, y + b.d + 1.2, 0), p(x, y + b.d + 1.2, 0)])} style={{ fill: pal.shadow }} />
+          drawn before the interior so they never cover what is inside.
+          (The building's shadow is part of the site's shadow layer.) */}
       {ctx.edit && ctx.selected === b.id && (
         <polygon className="sel-outline" points={pts([p(x - 0.4, y - 0.4, 0.02), p(x + b.w + 0.4, y - 0.4, 0.02), p(x + b.w + 0.4, y + b.d + 0.4, 0.02), p(x - 0.4, y + b.d + 0.4, 0.02)])} />
       )}
@@ -380,6 +380,12 @@ function Interior({ site, b, x, y, ctx, pal }: { site: Site; b: Building; x: num
       {b.rooms.map((r) => (
         <RoomFloor key={r.id} r={r} x={x} y={y} pal={pal} site={site} b={b} ctx={ctx} />
       ))}
+      <ShadowLayer kind="floor">
+        {b.units.map((u) => {
+          const [w, d] = unitFootprint(u);
+          return <polygon key={u.id} points={footprintPts(x + u.pos.x, y + u.pos.y, w, d, u.kind === 'rack' ? 0.18 : 0.06, 0.005)} />;
+        })}
+      </ShadowLayer>
       <Prism b={backX} c={shade(wallC, -0.05)} right={shade(wallC, -0.12)} top={pal.wallCut} />
       <Prism b={backY} c={wallC} top={pal.wallCut} />
       {Array.from({ length: Math.max(1, Math.floor(b.w / 5)) }, (_, i) => {

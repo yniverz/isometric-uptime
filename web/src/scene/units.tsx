@@ -7,7 +7,7 @@ import { unitHealth } from '../state/health';
 import { MachineArt, RackDeviceArt, rackDeviceColor } from './devices';
 import { entityHandlers } from './interact';
 import { MACHINE_HEIGHT } from './layout';
-import { Billboard, FaceRect, GroundShadow, HitBox, Pin, Prism, useLabelScale, useMachineStatus, usePal } from './primitives';
+import { Billboard, FaceRect, HitBox, Pin, Prism, useLabelScale, useMachineStatus, usePal } from './primitives';
 
 export interface UnitCtx {
   /** [siteId, buildingId] */
@@ -74,7 +74,6 @@ export function RackView({ rack, ox, oy, ctx }: { rack: RackUnit; ox: number; oy
   return (
     <g className={`ent unit rack ${handlers.onClick ? 'active' : ''} ${dim ? 'dim' : ''} ${isFocus ? 'focus' : ''}`} {...handlers}>
       {ctx.edit && ctx.selected === rack.id && <Outline b={body} className="sel-outline" />}
-      <GroundShadow b={body} spread={0.18} opacity={0.22} />
       {handlers.onClick && <HitBox b={body} />}
       <g className="lift">
         <Prism b={body} c={pal.rackFrame} top={pal.rackTop} left={colors.left} right={colors.right} />
@@ -249,7 +248,6 @@ export function MachineView({ m, ox, oy, ctx }: { m: MachineUnit; ox: number; oy
     <g className={`ent unit machine ${handlers.onClick ? 'active' : ''} ${dim ? 'dim' : ''} ${isFocus ? 'focus' : ''}`} {...handlers}>
       {ctx.edit && ctx.selected === m.id && <Outline b={foot} className="sel-outline" />}
       {(self === 'down' || rollup === 'down') && <Outline b={foot} className="alarm-glow" />}
-      <GroundShadow b={foot} spread={0.05} opacity={0.14} />
       {handlers.onClick && <HitBox b={{ ...foot, h: height }} />}
       <g className="lift">
         <MachineArt m={m} fr={fr} self={self} />

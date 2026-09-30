@@ -171,9 +171,20 @@ export function HitBox({ b }: { b: Box }) {
   );
 }
 
-/** Soft elliptical shadow on the ground under a box. */
-export function GroundShadow({ b, spread = 0.25, opacity = 0.18 }: { b: Box; spread?: number; opacity?: number }) {
+/** Footprint polygon (on the ground) for shadow layers. */
+export function footprintPts(x: number, y: number, w: number, d: number, spread = 0, z = 0): string {
+  return pts([p(x - spread, y - spread, z), p(x + w + spread, y - spread, z), p(x + w + spread, y + d + spread, z), p(x - spread, y + d + spread, z)]);
+}
+
+/**
+ * Shadows are drawn as solid shapes inside one group whose *group* opacity makes
+ * them translucent – so overlapping shadows merge instead of getting darker.
+ */
+export function ShadowLayer({ kind, children }: { kind: 'floor' | 'ground' | 'far'; children: React.ReactNode }) {
   const pal = usePal();
-  const pts4 = [p(b.x - spread, b.y - spread, b.z), p(b.x + b.w + spread, b.y - spread, b.z), p(b.x + b.w + spread, b.y + b.d + spread, b.z), p(b.x - spread, b.y + b.d + spread, b.z)];
-  return <polygon className="gshadow" points={pts(pts4)} style={{ fill: pal.shadow, opacity: opacity * 0.75 }} />;
+  return (
+    <g className={`shadow-layer ${kind}`} style={{ fill: pal.shadow }}>
+      {children}
+    </g>
+  );
 }
