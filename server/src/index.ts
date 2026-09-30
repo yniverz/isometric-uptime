@@ -251,7 +251,7 @@ pruneEvents();
 setInterval(pruneEvents, 24 * 3600_000).unref();
 
 await app.listen({ port: config.port, host: config.host });
-console.log(`[boot] isometric-uptime ${config.version} listening on http://${config.host}:${config.port}`);
+console.log(`[boot] rackscape ${config.version} listening on http://${config.host}:${config.port}`);
 if (config.auth.enabled && config.auth.generatedPassword) {
   console.log(`[boot] no ADMIN_PASSWORD set – generated one. Login: ${config.auth.username} / ${config.auth.password}`);
   console.log(`[boot] (stored in ${path.join(config.dataDir, 'admin-password.txt')})`);

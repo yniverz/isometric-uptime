@@ -47,7 +47,7 @@ function useHealthChrome() {
     if (!summary) return;
     const [rollup, downStr] = summary.split('|');
     const down = Number(downStr);
-    document.title = down ? `(${down} down) Isometric Uptime` : 'Isometric Uptime';
+    document.title = down ? `(${down} down) Rackscape` : 'Rackscape';
     const color = STATUS_COLORS[rollup] ?? '#9aa9c0';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><polygon points="32,6 56,20 32,34 8,20" fill="#93A5CC"/><polygon points="8,20 32,34 32,60 8,46" fill="#7084AE"/><polygon points="56,20 32,34 32,60 56,46" fill="#4B5B82"/><circle cx="48" cy="48" r="13" fill="${color}" stroke="white" stroke-width="4"/></svg>`;
     const link = document.getElementById('favicon') as HTMLLinkElement | null;

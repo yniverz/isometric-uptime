@@ -95,7 +95,7 @@ export function LoginScreen() {
           <polygon points="28,10 16,17 16,30 28,23" fill="#4B5B82" />
           <polygon points="22,20 24,18.8 24,20.3 22,21.5" fill="#6FF0C4" />
         </svg>
-        <h1>Isometric Uptime</h1>
+        <h1>Rackscape</h1>
         <p className="muted">Log in to see your infrastructure.</p>
         <LoginForm u={u} p={p} setU={setU} setP={setP} err={err} busy={busy} onSubmit={async () => {
           setBusy(true);
@@ -192,7 +192,7 @@ export function SettingsDialog() {
             <div className="muted small">Back up or move your world as JSON.</div>
           </div>
           <div className="btn-row">
-            <button className="btn sm" disabled={!world} onClick={() => world && download(`isometric-uptime-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(world, null, 2))}>
+            <button className="btn sm" disabled={!world} onClick={() => world && download(`rackscape-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(world, null, 2))}>
               <Download size={14} /> Export
             </button>
             <button className="btn sm" onClick={() => needEdit() && fileRef.current?.click()}>
@@ -270,7 +270,7 @@ export function SettingsDialog() {
           </button>
         </div>
         <div className="about muted small">
-          Isometric Uptime {session?.version} · {source?.mode === 'demo' ? 'demo mode' : `Uptime Kuma ${source?.state ?? ''}`}
+          Rackscape {session?.version} · {source?.mode === 'demo' ? 'demo mode' : `Uptime Kuma ${source?.state ?? ''}`}
           {session?.kumaUrl && (
             <>
               {' · '}

@@ -1,5 +1,5 @@
 {
-  "name": "isometric-uptime",
+  "name": "rackscape",
   "version": "0.1.0",
   "private": true,
   "description": "An isometric, explorable world view of your infrastructure's health, powered by Uptime Kuma.",

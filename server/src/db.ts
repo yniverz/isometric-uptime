@@ -1,9 +1,20 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { config } from './config.js';
 import type { EventDTO, Status } from '../../shared/status.js';
 
-const db = new DatabaseSync(path.join(config.dataDir, 'isometric-uptime.db'));
+const DB_FILE = path.join(config.dataDir, 'rackscape.db');
+// Installations from before the rename used a different file name.
+const LEGACY_DB_FILE = path.join(config.dataDir, 'isometric-uptime.db');
+if (!fs.existsSync(DB_FILE) && fs.existsSync(LEGACY_DB_FILE)) {
+  for (const suffix of ['', '-wal', '-shm']) {
+    if (fs.existsSync(LEGACY_DB_FILE + suffix)) fs.renameSync(LEGACY_DB_FILE + suffix, DB_FILE + suffix);
+  }
+  console.log('[boot] migrated isometric-uptime.db → rackscape.db');
+}
+
+const db = new DatabaseSync(DB_FILE);
 db.exec(`
   PRAGMA journal_mode = WAL;
   CREATE TABLE IF NOT EXISTS world (

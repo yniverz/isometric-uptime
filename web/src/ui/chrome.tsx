@@ -103,9 +103,9 @@ export function TopBar() {
   return (
     <header className="topbar">
       <div className="tb-left glass">
-        <button className="brand" onClick={() => navigate([])} title="Isometric Uptime">
+        <button className="brand" onClick={() => navigate([])} title="Rackscape">
           <Logo />
-          <span className="brand-name">Isometric Uptime</span>
+          <span className="brand-name">Rackscape</span>
         </button>
         <Breadcrumbs />
       </div>

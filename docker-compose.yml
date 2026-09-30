@@ -1,7 +1,7 @@
-# Isometric Uptime
+# Rackscape
 #
 # Portainer: Stacks → Add stack → Repository
-#   Repository URL:  https://github.com/yniverz/isometric-uptime
+#   Repository URL:  https://github.com/yniverz/rackscape
 #   Compose path:    docker-compose.yml
 #   Environment:     set the variables below (KUMA_URL, KUMA_USERNAME, ...)
 #   Update:          "Pull and redeploy" with "Re-pull image" enabled
@@ -9,13 +9,13 @@
 # Plain Docker:  docker compose pull && docker compose up -d
 
 services:
-  isometric-uptime:
+  rackscape:
     # Prebuilt image (amd64 + arm64), published by GitHub Actions on every push.
-    image: ghcr.io/yniverz/isometric-uptime:latest
+    image: ghcr.io/yniverz/rackscape:latest
     # To build locally from source instead, replace the line above with:
     #   build: .
     #   pull_policy: build
-    container_name: isometric-uptime
+    container_name: rackscape
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
@@ -45,6 +45,7 @@ services:
       FRAME_ANCESTORS: ${FRAME_ANCESTORS:-'self'}
       TZ: ${TZ:-Europe/Berlin}
     volumes:
+      # (volume keeps its original name so existing installs keep their data)
       - isometric-uptime-data:/data
 
 volumes:

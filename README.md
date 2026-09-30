@@ -1,8 +1,8 @@
 [![License: NCPUL](https://img.shields.io/badge/license-NCPUL-blue.svg)](./LICENSE.md)
 
-# Isometric Uptime
+# Rackscape
 
-An explorable, isometric world of your infrastructure – sites, buildings, rooms, racks, servers, VMs and services – with live status from **Uptime Kuma**.
+**Your racks as a landscape.** An explorable, isometric world of your infrastructure – sites, buildings, rooms, racks, servers, VMs and services – with live status from **Uptime Kuma**.
 
 Instead of a list of monitors you get one continuous world: click a site and the camera flies onto its island, click a building and the roof lifts off, click a rack and it fills the screen, click a server and it slides out like a drawer while its VMs and services float above it as a hologram. Every LED, pin and beacon reflects the live state of your Kuma monitors.
 
@@ -33,7 +33,7 @@ Instead of a list of monitors you get one continuous world: click a site and the
 ## Deploy with Portainer
 
 1. **Stacks → Add stack → Repository**
-2. Repository URL: `https://github.com/yniverz/isometric-uptime`, compose path: `docker-compose.yml`
+2. Repository URL: `https://github.com/yniverz/rackscape`, compose path: `docker-compose.yml`
 3. Add environment variables (at least):
 
    | Variable | Example | |
@@ -45,7 +45,7 @@ Instead of a list of monitors you get one continuous world: click a site and the
 
 4. Deploy, open `http://<host>:3000`, click **Edit** and start building your world.
 
-The stack uses the prebuilt image `ghcr.io/yniverz/isometric-uptime:latest` (amd64 and arm64), which GitHub Actions publishes on every push. To update, use **Pull and redeploy** with **Re-pull image** enabled – it only downloads the new image, so it takes seconds.
+The stack uses the prebuilt image `ghcr.io/yniverz/rackscape:latest` (amd64 and arm64), which GitHub Actions publishes on every push. To update, use **Pull and redeploy** with **Re-pull image** enabled – it only downloads the new image, so it takes seconds.
 
 To build from source on your own server instead, replace the `image:` line in `docker-compose.yml` with `build: .` and `pull_policy: build` (this takes a few minutes per deploy).
 
@@ -54,11 +54,11 @@ To build from source on your own server instead, replace the `image:` line in `d
 ### Plain Docker
 
 ```bash
-git clone https://github.com/yniverz/isometric-uptime.git
+git clone https://github.com/yniverz/rackscape.git
 ```
 
 ```bash
-cd isometric-uptime && KUMA_URL=http://192.168.1.10:3001 KUMA_USERNAME=admin KUMA_PASSWORD=secret ADMIN_PASSWORD=change-me docker compose up -d
+cd rackscape && KUMA_URL=http://192.168.1.10:3001 KUMA_USERNAME=admin KUMA_PASSWORD=secret ADMIN_PASSWORD=change-me docker compose up -d
 ```
 
 ## Configuration
@@ -82,7 +82,7 @@ cd isometric-uptime && KUMA_URL=http://192.168.1.10:3001 KUMA_USERNAME=admin KUM
 
 ### How the Kuma connection works
 
-Uptime Kuma has no full REST API, so Isometric Uptime connects like Kuma's own web UI: over Socket.IO, as a logged-in user. It receives the monitor list and live heartbeats in real time and asks Kuma for history when you open a detail panel. Both Kuma 1.x/2.0–2.5 (socket login) and the newer better-auth based versions (cookie session) are supported and detected automatically. Consider creating a dedicated Kuma user. The connection is read-only; nothing in Kuma is changed.
+Uptime Kuma has no full REST API, so Rackscape connects like Kuma's own web UI: over Socket.IO, as a logged-in user. It receives the monitor list and live heartbeats in real time and asks Kuma for history when you open a detail panel. Both Kuma 1.x/2.0–2.5 (socket login) and the newer better-auth based versions (cookie session) are supported and detected automatically. Consider creating a dedicated Kuma user. The connection is read-only; nothing in Kuma is changed.
 
 ### Security notes
 
