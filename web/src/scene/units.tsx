@@ -65,9 +65,8 @@ export function RackView({ rack, ox, oy, ctx }: { rack: RackUnit; ox: number; oy
   const side = fr.side;
   const colors = front === 'left' ? { left: pal.rackFrame, right: pal.rackSide } : { right: pal.rackFrame, left: pal.rackSide };
 
+  // Bottom to top: each device's thin top edge is then covered by the one above.
   const devices = [...rack.devices].sort((a, b) => a.u - b.u);
-  const lift = (id: string) => (id === ctx.focusDevice ? 2 : id === hovered ? 1 : 0);
-  devices.sort((a, b) => lift(a.id) - lift(b.id));
 
   const fb = faceMap(body, front);
   const cavity = { u0: 0.07, u1: RACK_WIDTH - 0.07, v0: RACK_BASE, v1: H - RACK_TOP };
@@ -97,20 +96,25 @@ export function RackView({ rack, ox, oy, ctx }: { rack: RackUnit; ox: number; oy
               </g>
             );
           })}
-        {devices.map((d) => (
-          <RackDeviceView
-            key={d.id}
-            d={d}
-            fr={fr}
-            path={[...path, d.id]}
-            active={isFocus && ctx.focusDevice !== d.id}
-            focused={ctx.focusDevice === d.id}
-            hovered={hovered === d.id}
-            setHovered={setHovered}
-            edit={ctx.edit}
-            selected={ctx.selected === d.id}
-          />
-        ))}
+        {(['plate', 'drawer'] as const).map((layer) =>
+          layer === 'drawer' && !isFocus
+            ? null
+            : devices.map((d) => (
+                <RackDeviceView
+                  key={`${layer}-${d.id}`}
+                  layer={layer}
+                  d={d}
+                  fr={fr}
+                  path={[...path, d.id]}
+                  active={isFocus && ctx.focusDevice !== d.id}
+                  focused={ctx.focusDevice === d.id}
+                  hovered={hovered === d.id}
+                  setHovered={setHovered}
+                  edit={ctx.edit}
+                  selected={ctx.selected === d.id}
+                />
+              )),
+        )}
         <g className={`strip st-${rollup}`}>
           <polygon className="strip-glow" points={quad(fb, 0.12, H - RACK_TOP * 0.8, RACK_WIDTH - 0.12, H - RACK_TOP * 0.25)} />
           <polygon className="strip-core" points={quad(fb, 0.18, H - RACK_TOP * 0.66, RACK_WIDTH - 0.18, H - RACK_TOP * 0.4)} />
@@ -158,7 +162,16 @@ function DeviceLabel({ d, x, y, z }: { d: RackDevice; x: number; y: number; z: n
   return <Billboard x={x} y={y} z={z - (10 * ls * 0.9) / T} text={d.name} status={DEVICE_TYPES[d.type].monitored || d.monitorId != null ? rollup : undefined} anchor="end" size={10} className="lbl-dev" />;
 }
 
+/**
+ * A rack device is drawn in two layers:
+ *  - "plate": the device flush in the rack, always drawn in bottom-to-top order so
+ *    its thin top/side edges sit correctly behind the device above;
+ *  - "drawer": only while sliding out – the part in front of the rack, drawn after
+ *    all plates. It starts exactly at the plate's front, so the two join seamlessly
+ *    and the drawer never covers the device above.
+ */
 function RackDeviceView({
+  layer,
   d,
   fr,
   path,
@@ -169,6 +182,7 @@ function RackDeviceView({
   edit,
   selected,
 }: {
+  layer: 'plate' | 'drawer';
   d: RackDevice;
   fr: Frame;
   path: string[];
@@ -181,15 +195,17 @@ function RackDeviceView({
 }) {
   const pal = usePal();
   const { self } = useMachineStatus(d);
-  const slide = useTween(focused ? 1.4 : hovered && active ? 0.35 : 0);
+  const slide = useTween(layer === 'drawer' && (focused || (hovered && active)) ? (focused ? 1.4 : 0.35) : 0);
   const zb = RACK_BASE + (d.u - 1) * U_HEIGHT + 0.003;
   const hh = d.size * U_HEIGHT - 0.006;
-  // Flush devices are a thin plate whose back edge is hidden by the device above.
-  // A slid-out device only draws the part in front of the neighbours' front plane,
-  // so its top face never covers the device above it.
+  const W = RACK_WIDTH - 0.14;
   const FRONT = RACK_DEPTH + 0.03;
+  const plate = fr.box(0.07, RACK_DEPTH - 0.01, zb, W, 0.04, hh);
   const out = slide > 0.002;
-  const box = out ? fr.box(0.07, FRONT, zb, RACK_WIDTH - 0.14, slide, hh) : fr.box(0.07, RACK_DEPTH - 0.01, zb, RACK_WIDTH - 0.14, 0.04, hh);
+  if (layer === 'drawer' && !out) return null;
+  const box = layer === 'drawer' ? fr.box(0.07, FRONT, zb, W, slide, hh) : plate;
+  // Front decorations live on whichever part is currently the front.
+  const showFront = layer === 'drawer' || !(hovered && active);
   const c = rackDeviceColor(d.type, pal);
   const h = entityHandlers({ id: d.id, path, active });
   return (
@@ -205,11 +221,11 @@ function RackDeviceView({
         h.onPointerLeave?.();
       }}
     >
-      <polygon className="hit" points={quad(faceMap(fr.box(0.07, RACK_DEPTH - 0.01, zb, RACK_WIDTH - 0.14, 0.04, hh), fr.front), 0, 0, RACK_WIDTH - 0.14, hh)} />
+      {layer === 'plate' && <polygon className="hit" points={quad(faceMap(plate, fr.front), 0, 0, W, hh)} />}
       <Prism b={box} c={c} top={d.type === 'blank' ? pal.rackTop : pal.devTop} />
-      <RackDeviceArt m={d} b={box} face={fr.front} self={self} />
-      {self === 'down' && <polygon className="dev-alarm" points={quad(faceMap(box, fr.front), 0, 0, RACK_WIDTH - 0.14, hh)} />}
-      {(focused || (edit && selected)) && <polygon className="dev-focus" points={quad(faceMap(box, fr.front), -0.01, -0.004, RACK_WIDTH - 0.13, hh + 0.004)} />}
+      {showFront && <RackDeviceArt m={d} b={box} face={fr.front} self={self} />}
+      {self === 'down' && <polygon className="dev-alarm" points={quad(faceMap(box, fr.front), 0, 0, W, hh)} />}
+      {(focused || (edit && selected)) && (layer === 'drawer' || !focused) && <polygon className="dev-focus" points={quad(faceMap(box, fr.front), -0.01, -0.004, W + 0.01, hh + 0.004)} />}
     </g>
   );
 }
