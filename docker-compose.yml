@@ -1,0 +1,47 @@
+# Isometric Uptime
+#
+# Portainer: Stacks → Add stack → Repository
+#   Repository URL:  https://github.com/yniverz/isometric-uptime
+#   Compose path:    docker-compose.yml
+#   Environment:     set the variables below (KUMA_URL, KUMA_USERNAME, ...)
+#
+# Plain Docker:  docker compose up -d --build
+
+services:
+  isometric-uptime:
+    build: .
+    image: isometric-uptime:latest
+    container_name: isometric-uptime
+    restart: unless-stopped
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      # --- Uptime Kuma ---------------------------------------------------
+      # Base URL of your Kuma instance as reachable *from this container*.
+      KUMA_URL: ${KUMA_URL:-}
+      KUMA_USERNAME: ${KUMA_USERNAME:-}
+      KUMA_PASSWORD: ${KUMA_PASSWORD:-}
+      # Only if the Kuma account uses 2FA: the base32 TOTP secret.
+      KUMA_TOTP_SECRET: ${KUMA_TOTP_SECRET:-}
+      # URL your browser uses for Kuma (for "open in Kuma" links), if different.
+      KUMA_PUBLIC_URL: ${KUMA_PUBLIC_URL:-}
+      # --- This app ------------------------------------------------------
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      # Leave empty to have one generated (printed in the container log).
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      # true = anyone who can reach the page may view (editing still needs login)
+      PUBLIC_READ: ${PUBLIC_READ:-false}
+      # true = no login at all (e.g. behind Authelia / a VPN)
+      AUTH_DISABLED: ${AUTH_DISABLED:-false}
+      # true = ignore Kuma and show fake demo data
+      DEMO_MODE: ${DEMO_MODE:-}
+      # Reverse proxies allowed to set X-Forwarded-* headers
+      TRUST_PROXY: ${TRUST_PROXY:-loopback,linklocal,uniquelocal}
+      # Allow embedding in a dashboard, e.g. "'self' https://dash.example.com"
+      FRAME_ANCESTORS: ${FRAME_ANCESTORS:-'self'}
+      TZ: ${TZ:-Europe/Berlin}
+    volumes:
+      - isometric-uptime-data:/data
+
+volumes:
+  isometric-uptime-data:

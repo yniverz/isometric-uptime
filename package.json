@@ -1,0 +1,41 @@
+{
+  "name": "isometric-uptime",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An isometric, explorable world view of your infrastructure's health, powered by Uptime Kuma.",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,magenta \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "PORT=3000 tsx watch --clear-screen=false server/src/index.ts",
+    "dev:web": "vite --port 5173 --strictPort",
+    "build": "npm run build:web && npm run build:server",
+    "build:web": "vite build",
+    "build:server": "tsc -p server/tsconfig.json",
+    "typecheck": "tsc -p server/tsconfig.json --noEmit && tsc -p web/tsconfig.json --noEmit",
+    "start": "node --disable-warning=ExperimentalWarning build/server/src/index.js"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.1.2",
+    "@fastify/static": "^10.1.5",
+    "fastify": "^5.12.5",
+    "socket.io-client": "^4.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "concurrently": "^10.0.5",
+    "lucide-react": "^1.49.0",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.1",
+    "zustand": "^5.0.15"
+  }
+}

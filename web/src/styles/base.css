@@ -1,0 +1,101 @@
+:root {
+  --font: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --up: #22c58b;
+  --down: #ff5a64;
+  --pending: #f5b331;
+  --degraded: #ff8a3d;
+  --maintenance: #5b8cff;
+  --paused: #97a3b8;
+  --unknown: #a5b0c4;
+  --led-up: #6ff0c4;
+  --led-off: #56668e;
+
+  --bg: #dfe7ef;
+  --panel: rgba(255, 255, 255, 0.82);
+  --panel-solid: #ffffff;
+  --panel-border: rgba(38, 49, 77, 0.09);
+  --panel-shadow: 0 18px 50px -18px rgba(38, 52, 90, 0.35), 0 2px 6px rgba(38, 52, 90, 0.06);
+  --text: #1f2a44;
+  --text-2: #56648a;
+  --text-3: #8a96b3;
+  --hover: rgba(38, 49, 77, 0.05);
+  --active: rgba(91, 140, 255, 0.12);
+  --line: rgba(38, 49, 77, 0.08);
+  --input: rgba(38, 49, 77, 0.05);
+  --accent: #5b8cff;
+  --accent-2: #3f6fe8;
+  --select: #5b8cff;
+  --select-fill: rgba(91, 140, 255, 0.1);
+  --holo: #3fb5cf;
+  --pin-stroke: #ffffff;
+  --label-halo: rgba(255, 255, 255, 0.9);
+  --halo-opacity: 0.28;
+  --lamp-opacity: 0.25;
+  --smoke: #ffffff;
+  --scr-on: #4fb6dc;
+  --scr-off: #1d2437;
+  --chip-top: #dde6f5;
+  --chip-left: #93a5cc;
+  --chip-right: #7084ae;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #0e1422;
+  --panel: rgba(20, 27, 42, 0.84);
+  --panel-solid: #161d2d;
+  --panel-border: rgba(255, 255, 255, 0.07);
+  --panel-shadow: 0 18px 50px -18px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.25);
+  --text: #e7edf8;
+  --text-2: #a3b0cb;
+  --text-3: #6f7c99;
+  --hover: rgba(255, 255, 255, 0.05);
+  --active: rgba(127, 166, 255, 0.16);
+  --line: rgba(255, 255, 255, 0.07);
+  --input: rgba(255, 255, 255, 0.06);
+  --accent: #7fa6ff;
+  --accent-2: #5b8cff;
+  --select: #7fa6ff;
+  --select-fill: rgba(127, 166, 255, 0.12);
+  --holo: #5cd6ee;
+  --pin-stroke: #0e1422;
+  --label-halo: rgba(14, 20, 34, 0.9);
+  --halo-opacity: 0.55;
+  --lamp-opacity: 0.6;
+  --smoke: #9aa8c4;
+  --chip-top: #56668e;
+  --chip-left: #3a4769;
+  --chip-right: #2a3450;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+button {
+  font: inherit;
+  color: inherit;
+}
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+::selection {
+  background: var(--active);
+}

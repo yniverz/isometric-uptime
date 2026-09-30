@@ -1,0 +1,607 @@
+/* ------------------------------------------------------------------------
+   Isometric world
+   ------------------------------------------------------------------------ */
+
+.world {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.world.panning {
+  cursor: grabbing;
+}
+.world polygon {
+  stroke-width: 0.6px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.world text {
+  font-family: var(--font);
+  pointer-events: none;
+}
+
+/* status colour plumbing */
+.st-up { --st: var(--up); --led: var(--led-up); }
+.st-down { --st: var(--down); --led: var(--down); }
+.st-pending { --st: var(--pending); --led: var(--pending); }
+.st-degraded { --st: var(--degraded); --led: var(--degraded); }
+.st-maintenance { --st: var(--maintenance); --led: var(--maintenance); }
+.st-paused { --st: var(--paused); --led: var(--led-off); }
+.st-unknown { --st: var(--unknown); --led: var(--led-off); }
+
+/* ---- hover lift ------------------------------------------------------- */
+.lift {
+  transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.28s;
+}
+.site.active > .site-body:hover > .lift,
+.building.active > .ext:hover > .lift,
+.unit.active:hover > .lift {
+  transform: translateY(var(--lift));
+}
+.unit.active:hover > .lift {
+  filter: brightness(1.06);
+}
+.ent.active {
+  cursor: pointer;
+}
+.dev.active {
+  cursor: pointer;
+}
+.editing .ent.active {
+  cursor: move;
+}
+
+/* ---- focus dimming ---------------------------------------------------- */
+.site,
+.building,
+.unit,
+.deco {
+  transition: opacity 0.55s ease;
+}
+.site.dim {
+  opacity: 0.32;
+}
+.building.fade,
+.deco.fade {
+  opacity: 0.16;
+}
+.building.fade:hover {
+  opacity: 0.45;
+}
+.unit.dim {
+  opacity: 0.14;
+}
+.hit polygon,
+polygon.hit {
+  fill: transparent !important;
+  stroke: none !important;
+}
+.leader {
+  stroke: var(--text-3);
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.6;
+}
+.lvl-cluster .site {
+  opacity: 0.9;
+}
+
+/* ---- building open / close ------------------------------------------- */
+.building .ext-roof {
+  transition: transform 0.75s cubic-bezier(0.5, 0, 0.2, 1), opacity 0.55s ease;
+}
+.building .ext-body {
+  transition: opacity 0.55s ease 0.1s;
+}
+.building.open > .ext {
+  pointer-events: none;
+}
+.building.open .ext-roof {
+  transform: translateY(-140px);
+  opacity: 0;
+}
+.building.open .ext-body {
+  opacity: 0;
+}
+.building.open .interior {
+  animation: fadeIn 0.7s ease 0.15s both;
+}
+.building:not(.open) .interior {
+  animation: fadeOut 0.5s ease both;
+  pointer-events: none;
+}
+.bshadow {
+  opacity: 0.12;
+  filter: url(#soft);
+}
+.island-shadow {
+  opacity: 0.18;
+  filter: url(#softer);
+}
+.dark .island-shadow {
+  opacity: 0.55;
+}
+.floor-line {
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+}
+.floor-text {
+  opacity: 0.55;
+}
+
+/* ---- labels ----------------------------------------------------------- */
+.billboard {
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.world:not(.lvl-world) .lbl-site {
+  opacity: 0;
+}
+.lbl-bld {
+  opacity: 0;
+}
+.lvl-site .site.focus .lbl-bld {
+  opacity: 1;
+}
+.pin-bld {
+  transition: opacity 0.4s;
+}
+.world:not(.lvl-world):not(.lvl-site) .pin-bld {
+  opacity: 0;
+}
+.pin-unit {
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+.lvl-building .pin-unit,
+.lvl-cluster .pin-unit {
+  opacity: 1;
+}
+.unit.focus .pin-unit {
+  opacity: 0;
+}
+.dev-labels {
+  animation: fadeIn 0.5s ease 0.3s both;
+}
+.bb-dot {
+  fill: var(--st);
+}
+
+/* ---- status pins ------------------------------------------------------ */
+.pin {
+  pointer-events: none;
+}
+.pin-dot {
+  fill: var(--st);
+  stroke: var(--pin-stroke);
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+.pin-shine {
+  fill: #fff;
+  opacity: 0.45;
+}
+.pin-stem {
+  stroke: var(--st);
+  stroke-width: 1.2px;
+  vector-effect: non-scaling-stroke;
+  opacity: 0.55;
+}
+.pin-ring {
+  fill: none;
+  stroke: var(--st);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring 1.6s ease-out infinite;
+}
+
+/* ---- LEDs ------------------------------------------------------------- */
+.led-core {
+  fill: var(--led);
+  stroke: none !important;
+}
+.led-halo {
+  fill: var(--led);
+  opacity: var(--halo-opacity);
+  stroke: none !important;
+}
+.led.st-unknown .led-halo,
+.led.st-paused .led-halo {
+  opacity: 0;
+}
+.led.st-down .led-core,
+.led.st-down .led-halo {
+  animation: blink 0.9s steps(2, jump-none) infinite;
+}
+.led.st-pending .led-core {
+  animation: blink 1.6s ease-in-out infinite;
+}
+.strip-core {
+  fill: var(--led);
+}
+.strip-glow {
+  fill: var(--led);
+  opacity: var(--halo-opacity);
+}
+.strip.st-down .strip-core,
+.strip.st-down .strip-glow {
+  animation: blink 1s ease-in-out infinite;
+}
+.blink {
+  stroke: none !important;
+}
+.blink.act {
+  fill: var(--led-up);
+}
+.blink.idle {
+  fill: var(--led-off);
+}
+.lvl-rack .blink.act,
+.lvl-machine .blink.act {
+  animation-name: flicker;
+  animation-iteration-count: infinite;
+  animation-timing-function: steps(2, jump-none);
+}
+.blink.soft {
+  opacity: 0.7;
+}
+.bat {
+  fill: #3a8fa2;
+}
+.bat.on {
+  fill: #8fe3ee;
+}
+.blink-slow {
+  animation: blink 2.4s ease-in-out infinite;
+}
+
+/* screens */
+.screen .scr {
+  fill: var(--scr-off);
+  stroke: none !important;
+  transition: fill 0.4s;
+}
+.screen .scr-line,
+.screen .scr-block,
+.screen .scr-alert {
+  opacity: 0;
+  stroke: none !important;
+}
+.screen.st-up .scr,
+.screen.st-degraded .scr {
+  fill: var(--scr-on);
+}
+.screen.st-up .scr-line,
+.screen.st-degraded .scr-line {
+  fill: #fff;
+  opacity: 0.55;
+}
+.screen.st-up .scr-block,
+.screen.st-degraded .scr-block {
+  fill: #fff;
+  opacity: 0.22;
+}
+.screen.st-up .scr-block.b2 {
+  opacity: 0.12;
+}
+.screen.st-down .scr {
+  fill: #3b1a22;
+}
+.screen.st-down .scr-alert {
+  fill: var(--down);
+  opacity: 1;
+  animation: blink 1s ease-in-out infinite;
+}
+.screen.st-pending .scr,
+.screen.st-maintenance .scr {
+  fill: #33406a;
+}
+.screen.st-maintenance .scr-line {
+  fill: var(--maintenance);
+  opacity: 0.9;
+}
+
+.wifi-arc {
+  fill: none;
+  stroke: var(--led);
+  stroke-width: 1.4px;
+  vector-effect: non-scaling-stroke;
+  opacity: 0;
+}
+.wifi.st-up .wifi-arc {
+  animation: wifi 2.4s ease-out infinite;
+}
+
+/* ---- alarms & selection ---------------------------------------------- */
+.dev-alarm {
+  fill: var(--down);
+  stroke: none !important;
+  animation: alarm 1.2s ease-in-out infinite;
+  pointer-events: none;
+}
+.dev-focus {
+  fill: none;
+  stroke: var(--select) !important;
+  stroke-width: 2px !important;
+}
+.alarm-glow {
+  fill: var(--down);
+  stroke: none !important;
+  filter: url(#soft);
+  animation: alarm 1.4s ease-in-out infinite;
+}
+.sel-outline {
+  fill: var(--select-fill);
+  stroke: var(--select) !important;
+  stroke-width: 2px !important;
+  stroke-dasharray: 6 4;
+  animation: dash 0.9s linear infinite;
+  pointer-events: none;
+}
+
+/* ---- props ------------------------------------------------------------ */
+.smoke circle {
+  fill: var(--smoke);
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: smoke 4s ease-out infinite;
+}
+.lamp-glow {
+  opacity: var(--lamp-opacity);
+  filter: url(#soft);
+}
+
+/* ---- hologram --------------------------------------------------------- */
+.holo {
+  animation: fadeIn 0.6s ease 0.35s both;
+}
+.holo-beam {
+  stroke: var(--holo);
+  stroke-width: 10px;
+  stroke-linecap: round;
+  opacity: 0.18;
+  vector-effect: non-scaling-stroke;
+  animation: beam 2.4s ease-in-out infinite;
+}
+.plate {
+  animation: bob 5s ease-in-out infinite;
+}
+.plate-fill {
+  stroke-width: 1.6px !important;
+  vector-effect: non-scaling-stroke;
+}
+.plate-grid {
+  stroke-width: 1px;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 3 4;
+  opacity: 0.35;
+}
+.chip,
+.guest {
+  cursor: pointer;
+}
+.chip-lift {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.chip:hover .chip-lift,
+.guest:hover .chip-lift,
+.chip.selected .chip-lift,
+.guest.selected .chip-lift {
+  transform: translateY(calc(var(--lift) * 0.9));
+}
+.chip-shadow {
+  fill: var(--holo);
+  opacity: 0.18;
+}
+.chip-body .c-t {
+  fill: var(--chip-top);
+}
+.chip-body .c-l {
+  fill: var(--chip-left);
+}
+.chip-body .c-r {
+  fill: var(--chip-right);
+}
+.chip-led .c-t,
+.mini .c-t {
+  fill: var(--led);
+}
+.chip-led .c-l,
+.chip-led .c-r,
+.mini .c-l,
+.mini .c-r {
+  fill: var(--led);
+  filter: brightness(0.7);
+}
+.chip.st-unknown .chip-led .c-t,
+.mini.st-unknown .c-t {
+  fill: var(--led-off);
+}
+.chip-ring {
+  fill: none;
+  stroke: var(--st);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring 1.6s ease-out infinite;
+}
+.chip.selected .chip-ring,
+.guest.selected .chip-ring {
+  stroke: var(--select);
+  animation: none;
+  stroke-dasharray: 4 3;
+}
+.chip-label {
+  fill: var(--text);
+  font-weight: 600;
+  paint-order: stroke;
+  stroke: var(--label-halo);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+.guest-box polygon {
+  stroke-width: 1.2px !important;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 4 3;
+}
+.guest-kind {
+  font-weight: 700;
+  opacity: 0.7;
+}
+
+/* ---- cluster links ---------------------------------------------------- */
+.cluster-links {
+  pointer-events: none;
+  animation: fadeIn 0.6s ease 0.4s both;
+}
+.cluster-links .link {
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px currentColor);
+  stroke-dasharray: 10 7;
+  vector-effect: non-scaling-stroke;
+  animation: dash 0.9s linear infinite;
+  opacity: 0.9;
+}
+.member-pulse {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ring 1.8s ease-out infinite;
+}
+.member-halo {
+  fill: currentColor;
+  opacity: 0.35;
+}
+.member-dot {
+  fill: var(--st) !important;
+  stroke: #fff;
+  stroke-width: 1.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ---- keyframes -------------------------------------------------------- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+@keyframes alarm {
+  0%,
+  100% {
+    opacity: 0.08;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+@keyframes smoke {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translate(18px, -60px) scale(2.2);
+    opacity: 0;
+  }
+}
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(calc(var(--lift) * 0.5));
+  }
+}
+@keyframes beam {
+  0%,
+  100% {
+    opacity: 0.14;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+@keyframes wifi {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .world *,
+  .world {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

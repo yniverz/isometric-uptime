@@ -1,0 +1,8 @@
+node_modules/
+build/
+data/
+.env
+.DS_Store
+*.log
+data-dev/
+.claude/
