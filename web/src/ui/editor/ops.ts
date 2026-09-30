@@ -35,7 +35,8 @@ export function addSite(w: World, name = 'New site'): Site {
 const BUILDING_DEFAULTS: Record<BuildingKind, Pick<Building, 'w' | 'd' | 'floors' | 'floor'> & { name: string }> = {
   residential: { name: 'House', w: 14, d: 10, floors: 2, floor: 'wood' },
   commercial: { name: 'Office', w: 12, d: 12, floors: 4, floor: 'carpet' },
-  industrial: { name: 'Hall', w: 22, d: 16, floors: 2, floor: 'raised' },
+  industrial: { name: 'Hall', w: 22, d: 16, floors: 2, floor: 'concrete' },
+  datacenter: { name: 'Data center', w: 24, d: 16, floors: 2, floor: 'raised' },
 };
 
 export function addBuilding(site: Site, kind: BuildingKind): Building {

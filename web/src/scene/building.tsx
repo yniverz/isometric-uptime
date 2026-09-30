@@ -51,6 +51,7 @@ export function BuildingView({ site, b, ctx }: { site: Site; b: Building; ctx: B
   let ext: { body: ReactNode; roof: ReactNode; top: number };
   if (b.kind === 'residential') ext = house(b, x, y, H, pal);
   else if (b.kind === 'commercial') ext = office(b, x, y, H, pal);
+  else if (b.kind === 'datacenter') ext = datacenter(b, x, y, H, pal);
   else ext = factory(b, x, y, H, pal);
 
   return (
@@ -192,6 +193,104 @@ function office(b: Building, x: number, y: number, H: number, pal: Palette) {
   roof.push(<Prism key="hvac2" b={{ x: x + 4, y: y + 1.2, z: H, w: 1.6, d: 1.6, h: 0.7 }} c={pal.devSilver} />);
   roof.push(<Prism key="ant" b={{ x: x + b.w - 1.6, y: y + 1, z: H, w: 0.12, d: 0.12, h: 3 }} c={pal.devSide} />);
   roof.push(<circle key="antl" className="blink-slow" cx={p(x + b.w - 1.54, y + 1.06, H + 3.05)[0]} cy={p(x + b.w - 1.54, y + 1.06, H + 3.05)[1]} r={1.6} style={{ fill: pal.cableRed }} />);
+  return { body, roof, top: H + 0.9 };
+}
+
+/**
+ * Data center: a windowless, clean-clad box with louvred vents, an accent band,
+ * a secured entrance, a loading dock, rows of rooftop chillers with spinning fans
+ * and generator exhaust stacks.
+ */
+function datacenter(b: Building, x: number, y: number, H: number, pal: Palette) {
+  const walls: Box = { x, y, z: 0, w: b.w, d: b.d, h: H };
+  const body: ReactNode[] = [<Prism key="w" b={walls} c={pal.dcWall} hide={{ top: true }} />];
+  for (const face of ['left', 'right'] as const) {
+    const f = faceMap(walls, face);
+    const len = face === 'left' ? b.w : b.d;
+    const seam = shade(pal.dcWall, face === 'right' ? -0.34 : -0.1);
+    // horizontal cladding seams
+    for (let v = 1.4; v < H - 0.5; v += 1.4) body.push(<polygon key={`${face}s${v}`} points={quad(f, 0, v, len, v + 0.05)} style={fill(seam)} />);
+    // plinth and accent band
+    body.push(<polygon key={`${face}base`} points={quad(f, 0, 0, len, 0.35)} style={fill(shade(pal.dcWall, -0.35))} />);
+    body.push(<polygon key={`${face}acc`} points={quad(f, 0, H - 0.75, len, H - 0.45)} style={fill(face === 'right' ? shade(pal.dcAccent, -0.2) : pal.dcAccent)} />);
+    // louvred vent grilles between the entrance/dock areas
+    const louverC = face === 'right' ? shade(pal.dcLouver, -0.2) : pal.dcLouver;
+    const slat = shade(louverC, 0.28);
+    for (let u = 1.2; u < len - 1.6; u += 3.2) {
+      const nearDoor = face === 'left' ? Math.abs(u + 0.6 - len * 0.3) < 2.4 : Math.abs(u + 0.6 - len * 0.62) < 2.8;
+      if (nearDoor) continue;
+      body.push(<polygon key={`${face}l${u}`} points={quad(f, u, 1.2, u + 1.2, H - 1.3)} style={fill(louverC)} />);
+      for (let v = 1.45; v < H - 1.4; v += 0.32) body.push(<polygon key={`${face}l${u}-${v}`} points={quad(f, u + 0.08, v, u + 1.12, v + 0.07)} style={fill(slat)} />);
+    }
+  }
+  // secured entrance with canopy (front)
+  const fl = faceMap(walls, 'left');
+  const ex = b.w * 0.3;
+  body.push(<polygon key="door-frame" points={quad(fl, ex - 1.05, 0.35, ex + 1.05, 3.0)} style={fill(shade(pal.dcWall, -0.3))} />);
+  body.push(<polygon key="door" points={quad(fl, ex - 0.9, 0.35, ex + 0.9, 2.85)} style={fill(shade(pal.window, -0.25))} />);
+  body.push(<polygon key="door-mid" points={quad(fl, ex - 0.03, 0.35, ex + 0.03, 2.85)} style={fill(pal.windowFrame)} />);
+  body.push(<polygon key="reader" points={quad(fl, ex + 1.25, 1.3, ex + 1.45, 1.65)} style={fill(pal.fan)} />);
+  body.push(<polygon key="reader-led" points={quad(fl, ex + 1.3, 1.52, ex + 1.4, 1.6)} style={fill(pal.dcAccent)} />);
+  body.push(<Prism key="canopy" b={{ x: x + ex - 1.6, y: y + b.d, z: 3.15, w: 3.2, d: 1.1, h: 0.16 }} c={shade(pal.dcWall, -0.15)} />);
+  // loading dock (side)
+  const fr = faceMap(walls, 'right');
+  const dx = b.d * 0.62;
+  const dh = Math.min(3.4, H - 1.6);
+  body.push(<polygon key="dock-frame" points={quad(fr, dx - 1.75, 0.35, dx + 1.75, dh + 0.15)} style={fill(shade(pal.dcWall, -0.5))} />);
+  body.push(<polygon key="dock" points={quad(fr, dx - 1.6, 0.35, dx + 1.6, dh)} style={fill(shade(pal.factoryDoor, -0.15))} />);
+  for (let v = 0.65; v < dh; v += 0.32) body.push(<polygon key={`dock${v}`} points={quad(fr, dx - 1.6, v, dx + 1.6, v + 0.05)} style={fill(shade(pal.factoryDoor, -0.32))} />);
+  body.push(<polygon key="dock-y" points={quad(fr, dx - 1.75, 0.35, dx + 1.75, 0.5)} style={fill(pal.cableYellow)} />);
+
+  // roof
+  const roof: ReactNode[] = [];
+  roof.push(<polygon key="top" points={pts([p(x, y, H), p(x + b.w, y, H), p(x + b.w, y + b.d, H), p(x, y + b.d, H)])} style={fill(shade(pal.dcWall, 0.1))} />);
+  roof.push(<polygon key="inset" points={pts([p(x + 0.3, y + 0.3, H), p(x + b.w - 0.3, y + 0.3, H), p(x + b.w - 0.3, y + b.d - 0.3, H), p(x + 0.3, y + b.d - 0.3, H)])} style={fill(pal.dcRoof)} />);
+  // generator exhaust stacks (back corner)
+  for (let i = 0; i < 2; i++) {
+    const sx = x + 0.9 + i * 1.1;
+    roof.push(<Prism key={`gen${i}`} b={{ x: sx, y: y + 0.8, z: H, w: 0.55, d: 0.55, h: 2.2 }} c={pal.chiller} top={pal.fan} />);
+    roof.push(<Prism key={`genb${i}`} b={{ x: sx - 0.02, y: y + 0.78, z: H + 1.6, w: 0.59, d: 0.59, h: 0.22 }} c={pal.dcAccent} hide={{ top: true }} />);
+  }
+  // chiller rows
+  // A few rows of large units, centred on the free part of the roof.
+  const unitW = 2.8;
+  const unitD = 1.5;
+  const gapX = 0.8;
+  const gapY = 2.2;
+  const freeX = b.w - 3.8 - 1.0;
+  const freeY = b.d - 2.0;
+  const cols = Math.max(1, Math.floor((freeX + gapX) / (unitW + gapX)));
+  const rows = Math.max(1, Math.min(3, Math.floor((freeY + gapY) / (unitD + gapY))));
+  const x0 = x + 3.8 + (freeX - (cols * unitW + (cols - 1) * gapX)) / 2;
+  const y0 = y + 1.0 + (freeY - (rows * unitD + (rows - 1) * gapY)) / 2;
+  const TT = 16;
+  const r = 0.5;
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const bx = x0 + col * (unitW + gapX);
+      const by = y0 + row * (unitD + gapY);
+      const box: Box = { x: bx, y: by, z: H + 0.12, w: unitW, d: unitD, h: 0.75 };
+      roof.push(<Prism key={`cf${row}-${col}`} b={{ ...box, z: H, h: 0.12, x: bx + 0.1, y: by + 0.1, w: unitW - 0.2, d: unitD - 0.2 }} c={pal.fan} />);
+      roof.push(<Prism key={`c${row}-${col}`} b={box} c={pal.chiller} />);
+      const fl2 = faceMap(box, 'left');
+      for (let u = 0.15; u < unitW - 0.1; u += 0.18) roof.push(<polygon key={`cg${row}-${col}-${u}`} points={quad(fl2, u, 0.12, u + 0.08, 0.62)} style={fill(shade(pal.chiller, -0.2))} />);
+      for (let k = 0; k < 2; k++) {
+        const [cx, cy] = p(bx + unitW * (k === 0 ? 0.28 : 0.72), by + unitD / 2, H + 0.87);
+        const R = r * 1.2247 * TT;
+        roof.push(
+          <g key={`fan${row}-${col}-${k}`} transform={`translate(${cx.toFixed(1)},${cy.toFixed(1)}) scale(1,0.577)`}>
+            <circle r={R} style={fill(pal.fan)} />
+            <g className="fan-spin" style={{ animationDuration: `${1.4 + ((row * 7 + col * 3 + k) % 5) * 0.25}s` }}>
+              {[0, 72, 144, 216, 288].map((a) => (
+                <path key={a} d={`M0,0 L${(R * 0.9).toFixed(1)},${(-R * 0.18).toFixed(1)} A${(R * 0.9).toFixed(1)},${(R * 0.9).toFixed(1)} 0 0 1 ${(R * 0.72).toFixed(1)},${(R * 0.55).toFixed(1)} Z`} transform={`rotate(${a})`} style={{ fill: shade(pal.chiller, -0.15) }} />
+              ))}
+            </g>
+            <circle r={R * 0.18} style={fill(shade(pal.chiller, -0.3))} />
+          </g>,
+        );
+      }
+    }
+  }
   return { body, roof, top: H + 0.9 };
 }
 

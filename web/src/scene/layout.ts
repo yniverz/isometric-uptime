@@ -42,6 +42,7 @@ export function unitHeight(u: Unit): number {
 export function roofHeight(b: Building): number {
   if (b.kind === 'residential') return Math.min(b.w, b.d) * 0.32 + 0.6;
   if (b.kind === 'industrial') return 1.8;
+  if (b.kind === 'datacenter') return 1.2;
   return 1.2;
 }
 

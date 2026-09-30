@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Boxes, Building2, ChevronLeft, ChevronRight, Cpu, Factory, Home, Layers, MapPin, Network, Server } from 'lucide-react';
+import { Boxes, Building2, Database, ChevronLeft, ChevronRight, Cpu, Factory, Home, Layers, MapPin, Network, Server } from 'lucide-react';
 import type { Building, Cluster, Guest, Machine, RackUnit, Service, Site, World } from '../../../shared/model';
 import { DEVICE_TYPES, monitorUsage, safeUrl } from '../../../shared/model';
 import type { RollupStatus } from '../../../shared/status';
@@ -16,6 +16,8 @@ export function kindIcon(kind: string, size = 16): ReactNode {
       return <Home size={size} />;
     case 'commercial':
       return <Building2 size={size} />;
+    case 'datacenter':
+      return <Database size={size} />;
     case 'industrial':
       return <Factory size={size} />;
     case 'rack':

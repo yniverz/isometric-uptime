@@ -75,6 +75,12 @@ export interface Palette {
   factoryRoof: string;
   factoryDoor: string;
   stripe: string;
+  dcWall: string;
+  dcRoof: string;
+  dcLouver: string;
+  dcAccent: string;
+  chiller: string;
+  fan: string;
   // equipment (from the reference artwork)
   rackTop: string;
   rackFrame: string;
@@ -157,6 +163,12 @@ export const LIGHT: Palette = {
   factoryRoof: '#9AA6B6',
   factoryDoor: '#8E99AA',
   stripe: '#E86A5C',
+  dcWall: '#E4E9F0',
+  dcRoof: '#C9D2DE',
+  dcLouver: '#6B7A99',
+  dcAccent: '#3FB5CF',
+  chiller: '#D5DCE6',
+  fan: '#39476A',
   rackTop: '#63739A',
   rackFrame: '#39476A',
   rackSide: '#323D59',
@@ -238,6 +250,12 @@ export const DARK: Palette = {
   factoryRoof: '#3A4353',
   factoryDoor: '#353D4B',
   stripe: '#B8544A',
+  dcWall: '#4A5468',
+  dcRoof: '#3A4356',
+  dcLouver: '#262E40',
+  dcAccent: '#3FA8C2',
+  chiller: '#5A6478',
+  fan: '#1D2437',
   furniture: '#5A5048',
   furnitureDark: '#453D36',
   plastic: '#6B7488',

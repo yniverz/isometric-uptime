@@ -41,7 +41,8 @@
 .world.moving .sel-outline,
 .world.moving .dev-alarm,
 .world.moving .alarm-glow,
-.world.moving .scr-alert {
+.world.moving .scr-alert,
+.world.moving .fan-spin {
   animation-play-state: paused !important;
 }
 .world.moving .ent,
@@ -379,6 +380,14 @@ polygon.hit {
 }
 
 /* ---- props ------------------------------------------------------------ */
+.fan-spin {
+  animation: spin 1.6s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 .smoke circle {
   fill: var(--smoke);
   opacity: 0;

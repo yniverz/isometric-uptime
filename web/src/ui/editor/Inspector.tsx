@@ -27,6 +27,7 @@ const KINDS: { value: BuildingKind; label: string }[] = [
   { value: 'residential', label: 'Residential' },
   { value: 'commercial', label: 'Commercial' },
   { value: 'industrial', label: 'Industrial' },
+  { value: 'datacenter', label: 'Data center' },
 ];
 
 function deviceOptions(mount: 'rack' | 'standalone') {

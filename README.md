@@ -17,9 +17,9 @@ Instead of a list of monitors you get one continuous world: click a site and the
 ## Features
 
 - **One world, many levels** – World → Site → Building → Rack → Machine → Service, all in a single isometric scene with smooth camera flights (no page changes). Deep links via the URL, back with <kbd>Esc</kbd>.
-- **Hand-drawn look** – procedural SVG art in the style of classic isometric illustrations: floating island plots, houses with gable roofs, office towers, sawtooth-roof factories, raised server-room floors with vent tiles, racks with blinking port LEDs, desks, laptops, TVs, access points, cameras, printers …
+- **Hand-drawn look** – procedural SVG art in the style of classic isometric illustrations: floating island plots, houses with gable roofs, office towers, sawtooth-roof factories, data centers with rooftop chillers, raised server-room floors with vent tiles, racks with blinking port LEDs, desks, laptops, TVs, access points, cameras, printers …
 - **Live status** – green/red LEDs on devices, status pins, rack status strips, roof beacons and site labels roll up the worst state inside (down › degraded › pending › maintenance › up). Down things pulse; desktop screens turn red.
-- **Building types** – residential, commercial, industrial; single floor with rooms (raised floor, concrete, wood, carpet, tiles).
+- **Building types** – residential, commercial, industrial and data center (windowless cladding, louvred vents, rooftop chillers with spinning fans, generator stacks); single floor with rooms (raised floor, concrete, wood, carpet, tiles).
 - **Device types** – servers (1U–nU), switches, routers, firewalls, NAS, UPS (rack & tower), patch panels, PDUs, KVMs, blanks, tower servers, desktops, laptops, mini PCs, Raspberry Pis, modems, access points, cameras, printers, smart-home hubs, TVs, phones/tablets, IoT devices.
 - **Host + services** – each device has an optional host monitor (drives its main LED) plus any number of service monitors, VMs, LXCs and containers – each with their own services.
 - **Clusters (Proxmox HA, Kubernetes, Swarm …)** – group devices anywhere in the world. Workloads attached to a cluster "float" between members: they show up above every member and the cluster's health is judged by quorum. Highlighting a cluster opens the relevant buildings and draws animated links between its members.

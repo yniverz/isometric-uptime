@@ -163,7 +163,7 @@ export function buildDemo(): { world: World; monitors: MonitorInfo[] } {
   const hall = {
     id: id('b'),
     name: 'Hall A',
-    kind: 'industrial' as const,
+    kind: 'datacenter' as const,
     pos: { x: 4, y: 4 },
     w: 26,
     d: 18,

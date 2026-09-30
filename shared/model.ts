@@ -17,7 +17,7 @@ export interface Vec2 {
 }
 
 export type SiteTheme = 'grass' | 'urban' | 'sand' | 'snow';
-export type BuildingKind = 'residential' | 'commercial' | 'industrial';
+export type BuildingKind = 'residential' | 'commercial' | 'industrial' | 'datacenter';
 export type FloorMaterial = 'raised' | 'wood' | 'carpet' | 'concrete' | 'tile';
 export type Facing = 'left' | 'right';
 export type GuestKind = 'vm' | 'lxc' | 'container';
@@ -406,7 +406,7 @@ export function safeColor(v: unknown, def = '#8B7CF6'): string {
 }
 
 const SITE_THEMES = ['grass', 'urban', 'sand', 'snow'] as const;
-const BUILDING_KINDS = ['residential', 'commercial', 'industrial'] as const;
+const BUILDING_KINDS = ['residential', 'commercial', 'industrial', 'datacenter'] as const;
 const FLOORS = ['raised', 'wood', 'carpet', 'concrete', 'tile'] as const;
 const FACINGS = ['left', 'right'] as const;
 const GUEST_KINDS = ['vm', 'lxc', 'container'] as const;
