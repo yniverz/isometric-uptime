@@ -7,7 +7,7 @@ import { selectSub, useStore } from '../state/store';
 import { useHover } from '../state/ephemeral';
 import { HOLO_CELL, deviceFrontPoint, holoPlates, machineAnchor, type HoloPlate } from './layout';
 import { Billboard, useLabelScale, useMonStatus, usePal } from './primitives';
-import { pointer } from './interact';
+import { claimHover, pointer } from './interact';
 
 function top(b: Box) {
   const z = b.z;
@@ -95,7 +95,7 @@ function hoverProps(id: string) {
   return {
     onPointerEnter: (e: React.PointerEvent) => useHover.setState({ hover: { id, x: e.clientX, y: e.clientY } }),
     onPointerMove: (e: React.PointerEvent) => {
-      e.stopPropagation();
+      if (claimHover(e)) return;
       useHover.setState({ hover: { id, x: e.clientX, y: e.clientY } });
     },
     onPointerLeave: () => useHover.setState({ hover: null }),

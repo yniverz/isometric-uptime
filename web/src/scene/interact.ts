@@ -9,6 +9,18 @@ import { camera } from './camera';
 /** Shared between the background pan handler and entity handlers. */
 export const pointer = { moved: false, downX: 0, downY: 0, dragging: false };
 
+/**
+ * The innermost hovered entity wins; outer ones see the event already claimed.
+ * (Marks the native event instead of stopping propagation, so window-level
+ * listeners for dragging and panning still receive every move.)
+ */
+export function claimHover(e: { nativeEvent: Event }): boolean {
+  const ev = e.nativeEvent as Event & { __hoverClaimed?: boolean };
+  if (ev.__hoverClaimed) return true;
+  ev.__hoverClaimed = true;
+  return false;
+}
+
 export function pointerDown(e: { clientX: number; clientY: number }) {
   pointer.moved = false;
   pointer.downX = e.clientX;
@@ -69,6 +81,8 @@ function startDrag(e: RPointerEvent, id: string, kind: DragKind) {
   const [sx0, sy0] = camera.toWorld(e.clientX, e.clientY);
   const w0 = unproject(sx0, sy0);
   const start = { ...target.pos };
+  // Things it already overlaps when the drag starts don't block it (lets you pull apart overlaps).
+  const blockers = target.others.filter((o) => !overlaps({ ...start, ...target.size }, o));
   const move = (ev: PointerEvent) => {
     pointerMoved(ev);
     if (!pointer.moved) return;
@@ -83,7 +97,7 @@ function startDrag(e: RPointerEvent, id: string, kind: DragKind) {
     }
     if (nx === target.pos.x && ny === target.pos.y) return;
     // Don't walk into other things: keep the last free position.
-    if (target.others.some((o) => overlaps({ x: nx, y: ny, ...target.size }, o))) return;
+    if (blockers.some((o) => overlaps({ x: nx, y: ny, ...target.size }, o))) return;
     target.pos.x = nx;
     target.pos.y = ny;
     // Sites are memoised by object identity: give the containing site a new
@@ -94,14 +108,15 @@ function startDrag(e: RPointerEvent, id: string, kind: DragKind) {
     commitLive({ ...draft });
   };
   const up = () => {
-    window.removeEventListener('pointermove', move);
-    window.removeEventListener('pointerup', up);
-    window.removeEventListener('pointercancel', up);
+    window.removeEventListener('pointermove', move, true);
+    window.removeEventListener('pointerup', up, true);
+    window.removeEventListener('pointercancel', up, true);
     pointer.dragging = false;
   };
-  window.addEventListener('pointermove', move);
-  window.addEventListener('pointerup', up);
-  window.addEventListener('pointercancel', up);
+  // Capture phase: runs before anything in the scene can stop the event.
+  window.addEventListener('pointermove', move, true);
+  window.addEventListener('pointerup', up, true);
+  window.addEventListener('pointercancel', up, true);
 }
 
 export interface EntityOpts {
@@ -142,8 +157,7 @@ export function entityHandlers(o: EntityOpts) {
       if (e.pointerType === 'mouse') useHover.setState({ hover: { id: o.id, x: e.clientX, y: e.clientY } });
     },
     onPointerMove: (e: RPointerEvent) => {
-      if (e.pointerType !== 'mouse') return;
-      e.stopPropagation();
+      if (e.pointerType !== 'mouse' || claimHover(e)) return;
       const h = useHover.getState().hover;
       if (!h || h.id !== o.id || Math.abs(h.x - e.clientX) + Math.abs(h.y - e.clientY) > 2) useHover.setState({ hover: { id: o.id, x: e.clientX, y: e.clientY } });
     },

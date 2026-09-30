@@ -144,16 +144,17 @@ export function Scene({ insets }: { insets: { top: number; right: number; bottom
       pointers.current.delete(ev.pointerId);
       lastDist = 0;
       if (pointers.current.size === 0) {
-        window.removeEventListener('pointermove', move);
-        window.removeEventListener('pointerup', up);
-        window.removeEventListener('pointercancel', up);
+        window.removeEventListener('pointermove', move, true);
+        window.removeEventListener('pointerup', up, true);
+        window.removeEventListener('pointercancel', up, true);
         svgRef.current?.classList.remove('panning');
       }
     };
     if (pointers.current.size === 1) {
-      window.addEventListener('pointermove', move);
-      window.addEventListener('pointerup', up);
-      window.addEventListener('pointercancel', up);
+      // Capture phase, so moves over entities are never swallowed.
+      window.addEventListener('pointermove', move, true);
+      window.addEventListener('pointerup', up, true);
+      window.addEventListener('pointercancel', up, true);
       svgRef.current?.classList.add('panning');
     }
   };
