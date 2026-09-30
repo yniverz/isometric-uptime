@@ -195,7 +195,7 @@ export interface DeviceTypeInfo {
 
 export const DEVICE_TYPES: Record<DeviceType, DeviceTypeInfo> = {
   server: { label: 'Server', group: 'Compute', rack: true, standalone: false, defaultU: 2, footprint: [1, 2], monitored: true },
-  'tower-server': { label: 'Tower server', group: 'Compute', rack: false, standalone: true, defaultU: 4, footprint: [1, 2], monitored: true },
+  'tower-server': { label: 'Tower server', group: 'Compute', rack: false, standalone: true, defaultU: 4, footprint: [1, 1], monitored: true },
   desktop: { label: 'Desktop PC', group: 'Endpoint', rack: false, standalone: true, defaultU: 4, footprint: [3, 2], monitored: true },
   laptop: { label: 'Laptop', group: 'Endpoint', rack: false, standalone: true, defaultU: 1, footprint: [2, 2], monitored: true },
   'mini-pc': { label: 'Mini PC / NUC', group: 'Compute', rack: true, standalone: true, defaultU: 1, footprint: [2, 1], monitored: true },

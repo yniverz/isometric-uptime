@@ -13,8 +13,8 @@ export const HOLO_LAYER = 2.8;
 
 /** Height of standalone machines in tiles. */
 export const MACHINE_HEIGHT: Partial<Record<DeviceType, number>> = {
-  'tower-server': 2.0,
-  server: 2.0,
+  'tower-server': 0.85,
+  server: 0.85,
   desktop: 2.45,
   laptop: 1.8,
   'mini-pc': 1.1,

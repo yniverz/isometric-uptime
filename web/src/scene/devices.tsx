@@ -440,18 +440,22 @@ export function MachineArt({ m, fr, self }: ArtProps) {
       );
     }
     default: {
-      // tower server
-      const box = fr.box(0.15, 0.15, 0, 0.7, 1.7, 2.0);
+      // tower server: roughly 22 × 55 × 45 cm, the size of a large desktop tower
+      const box = fr.box(0.3, 0.05, 0.04, 0.4, 0.9, 0.78);
       return (
         <g>
+          {/* feet */}
+          <Prism b={fr.box(0.32, 0.1, 0, 0.36, 0.08, 0.04)} c={pal.rackDark} />
+          <Prism b={fr.box(0.32, 0.82, 0, 0.36, 0.08, 0.04)} c={pal.rackDark} />
           <Prism b={box} c={pal.rackFrame} />
-          {[0, 1, 2].map((i) => (
-            <FaceRect key={i} b={box} face={F} u0={0.08} v0={1.55 - i * 0.14} u1={0.62} v1={1.66 - i * 0.14} c={pal.devVent} />
+          {/* two drive bays at the top */}
+          <FaceRect b={box} face={F} u0={0.05} v0={0.64} u1={0.35} v1={0.7} c={pal.devVent} />
+          <FaceRect b={box} face={F} u0={0.05} v0={0.56} u1={0.35} v1={0.62} c={pal.devVent} />
+          {/* front grille */}
+          {[0, 1, 2, 3, 4].map((i) => (
+            <FaceRect key={`g${i}`} b={box} face={F} u0={0.07} v0={0.08 + i * 0.07} u1={0.33} v1={0.11 + i * 0.07} c={pal.rackDark} />
           ))}
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <FaceRect key={`g${i}`} b={box} face={F} u0={0.1} v0={0.2 + i * 0.12} u1={0.6} v1={0.26 + i * 0.12} c={pal.rackDark} />
-          ))}
-          {ledOn(box, F, 0.08, 1.8, self, m)}
+          {ledOn(box, F, 0.04, 0.47, self, m, 0.05)}
         </g>
       );
     }
