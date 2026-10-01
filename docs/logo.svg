@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- floor tile -->
+  <polygon points="60,72 112,94 60,116 8,94" fill="#C4D1DF"/>
+  <polygon points="8,94 60,116 60,120 8,98" fill="#A3B3C8"/>
+  <polygon points="112,94 60,116 60,120 112,98" fill="#8E9FB6"/>
+  <!-- rack -->
+  <polygon points="60,8 88,20 60,32 32,20" fill="#63739A"/>
+  <polygon points="32,20 60,32 60,104 32,92" fill="#39476A"/>
+  <polygon points="88,20 60,32 60,104 88,92" fill="#323D59"/>
+  <!-- cavity -->
+  <polygon points="35,29 57,38.5 57,99 35,89.5" fill="#1D2437"/>
+  <!-- status strip -->
+  <polygon points="37,24.5 55,32.2 55,34.6 37,26.9" fill="#6FF0C4"/>
+  <!-- devices -->
+  <polygon points="36,34 56,42.6 56,49 36,40.4" fill="#7084AE"/>
+  <polygon points="36,43 56,51.6 56,58 36,49.4" fill="#7084AE"/>
+  <polygon points="36,60 56,68.6 56,79 36,70.4" fill="#7084AE"/>
+  <polygon points="36,81 56,89.6 56,96 36,87.4" fill="#39476A"/>
+  <!-- LEDs -->
+  <polygon points="51.5,44.3 54,45.4 54,47.2 51.5,46.1" fill="#6FF0C4"/>
+  <polygon points="51.5,53.3 54,54.4 54,56.2 51.5,55.1" fill="#6FF0C4"/>
+  <polygon points="51.5,70.8 54,71.9 54,73.7 51.5,72.6" fill="#FF7F7F"/>
+  <polygon points="47.5,69.1 50,70.2 50,72 47.5,70.9" fill="#6FF0C4"/>
+  <polygon points="40,86 47,89 47,91.5 40,88.5" fill="#5CC6DA"/>
+  <!-- vents -->
+  <polygon points="40,38.6 46,41.2 46,44.6 40,42" fill="#556893"/>
+  <polygon points="40,47.6 46,50.2 46,53.6 40,51" fill="#556893"/>
+  <polygon points="68,30 82,24 82,26 68,32" fill="#2A3450"/>
+  <polygon points="68,34 82,28 82,30 68,36" fill="#2A3450"/>
+  <polygon points="68,38 82,32 82,34 68,40" fill="#2A3450"/>
+</svg>
